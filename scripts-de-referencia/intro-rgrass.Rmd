@@ -1,5 +1,5 @@
 ---
-title: "Crear una región de GRASS GIS desde R usando el paquete rgrass7"
+title: "Introducción a rgrass7, interfaz entre GRASS GIS 7 y R. Crear región de GRASS"
 output: github_document
 bibliography: ../biblio.bib
 csl: ../apa.csl
