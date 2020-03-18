@@ -1,8 +1,10 @@
-Crear una región de GRASS GIS desde R
+Crear una región de GRASS GIS desde R usando el paquete rgrass7
 ================
 
 Paquetes
 --------
+
+Sólo necesitamos el paquete `rgrass7` (R. Bivand, Krug, Neteler, Jeworutzki, & Bivand, 2019)
 
 ``` r
 library(rgrass7)
@@ -13,7 +15,7 @@ library(rgrass7)
 Región de GRASS
 ---------------
 
-![](../img/organizacion-grass-gis.jpg) Organización de directorio, localidad, conjuntos de mapas, capas vectoriales y ráster, según Neteler & Mitasova (2007)
+![](../img/organizacion-grass-gis.jpg) Organización de directorio, localidad, conjuntos de mapas, capas vectoriales y ráster, según M. Neteler & Mitasova (2007)
 
 ``` r
 gisdbase <- 'grass-data-test' #Base de datos de GRASS GIS
@@ -30,5 +32,7 @@ loc <- initGRASS(gisBase = "/usr/lib/grass78/",
 
 Referencias
 -----------
+
+Bivand, R., Krug, R., Neteler, M., Jeworutzki, S., & Bivand, M. R. (2019). *Package “rgrass7”*.
 
 Neteler, M., & Mitasova, H. (2007). *Open source gis: A grass gis approach*. Springer US.

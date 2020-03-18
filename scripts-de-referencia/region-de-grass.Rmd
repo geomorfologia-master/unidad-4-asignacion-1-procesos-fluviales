@@ -1,5 +1,5 @@
 ---
-title: "Crear una región de GRASS GIS desde R"
+title: "Crear una región de GRASS GIS desde R usando el paquete rgrass7"
 output: github_document
 bibliography: ../biblio.bib
 csl: ../apa.csl
@@ -17,6 +17,8 @@ knitr::opts_chunk$set(
 ```
 
 ## Paquetes
+
+Sólo necesitamos el paquete `rgrass7` [@bivand2019package]
 
 ```{r}
 library(rgrass7)

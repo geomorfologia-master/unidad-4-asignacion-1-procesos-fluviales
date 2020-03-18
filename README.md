@@ -60,7 +60,7 @@ Asignaciones a cada estudiante
 Ejercicios
 ----------
 
-### Ejercicio 0: Crea una región de GRASS GIS
+### Ejercicio 1: Crea una región de GRASS GIS desde R usando el paquete `rgrass7`
 
 [**Vídeo de referencia**]()
 
@@ -68,7 +68,13 @@ Ejercicios
 
 Dentro del bloque de código a continuación, carga el paquete `rgrass7` y crea una región de GRASS GIS utilizando los atributos correspondientes, que incluyen: nombre del directorio de la base de datos de GRASS GIS, nombre de localidad y el nombre del conjuntos de mapas. Todos estos nombres pueden elegirse libremente, pero dado que todos se convertirán en carpetas, considera lo siguiente: 1) No uses espacios, ni signos de puntuación, ni tildes; 2) Utiliza nombres con sentido, por ejemplo, para el nombre de localización es apropiado usar un topónimo.
 
-### EJERCICIO 1: Extracción de una cuenca hidrográfica
+### EJERCICIO 2: Definir proyección de región, importar DEM a GRASS GIS, actualizar región
+
+[**Vídeo de referencia**]()
+
+[**Script de referencia**](scripts-de-referencia/region-de-grass.md)
+
+### EJERCICIO 3: Extracción de una cuenca hidrográfica
 
 [**Vídeo de referencia**]()
 

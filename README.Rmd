@@ -74,7 +74,7 @@ invisible(purrr::map(
 
 ## Ejercicios
 
-### Ejercicio 1: Crea una región de GRASS GIS desde R
+### Ejercicio 1: Crea una región de GRASS GIS desde R usando el paquete `rgrass7`
 
 [**Vídeo de referencia**]()
 
