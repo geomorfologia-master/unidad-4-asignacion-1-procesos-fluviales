@@ -1,0 +1,42 @@
+---
+title: "Crear una región de GRASS GIS desde R"
+output: github_document
+bibliography: ../biblio.bib
+csl: ../apa.csl
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  collapse=TRUE,
+  fig.path = "img/",
+  eval = T
+)
+```
+
+## Paquetes
+
+```{r}
+library(rgrass7)
+```
+
+## Región de GRASS
+
+![](../img/organizacion-grass-gis.jpg)
+Organización de directorio, localidad, conjuntos de mapas, capas vectoriales y ráster, según @neteler2007open
+
+```{r}
+gisdbase <- 'grass-data-test' #Base de datos de GRASS GIS
+wd <- getwd() #Directorio de trabajo
+wd
+loc <- initGRASS(gisBase = "/usr/lib/grass78/",
+                 home = wd,
+                 gisDbase = paste(wd, gisdbase, sep = '/'),
+                 location = 'rdom',
+                 mapset = "PERMANENT",
+                 override = TRUE)
+```
+
+## Referencias
