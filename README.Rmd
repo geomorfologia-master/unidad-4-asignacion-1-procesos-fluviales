@@ -90,7 +90,7 @@ Dentro del bloque de código a continuación, carga el paquete `rgrass7` y crea 
 
 [**Vídeo de referencia**]()
 
-[**Script de referencia**](scripts-de-referencia/region-de-grass.md)
+[**Script de referencia**](scripts-de-referencia/intro-rgrass.md)
 
 
 
