@@ -1,0 +1,31 @@
+---
+title: "Crear una región de GRASS GIS desde R"
+output: github_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Paquetes
+
+
+```{r}
+library(rgrass7)
+```
+
+## Región de GRASS
+
+```{r}
+gisdbase <- 'grassdata'
+wd <- getwd()
+loc <- initGRASS(gisBase = "/usr/lib/grass78/",
+                 home = wd, 
+                 gisDbase = paste(wd, gisdbase, sep = '/'),
+                 location = 'data',
+                 mapset = "PERMANENT",
+                 override = TRUE)
+```
+
