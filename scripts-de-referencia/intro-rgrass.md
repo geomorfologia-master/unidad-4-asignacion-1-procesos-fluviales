@@ -30,6 +30,16 @@ loc <- initGRASS(gisBase = "/usr/lib/grass78/",
                  override = TRUE)
 ```
 
+Más información:
+
+-   [GRASS GIS for geomorphologists. Andrew Wickert](https://github.com/awickert/GRASS-GIS-for-geomorphologists)
+
+-   [Geomorphology in GRASS GIS. A 'how-to' manual. Skyler Sorsby](https://es.slideshare.net/SkylerSorsby/introduction-to-geomorphology-in-grass-gis-by-skyler-sorsby)
+
+-   [Funciones creadas por el profesor](https://github.com/geofis/rgrass)
+
+-   [Lista de recursos de pago](https://grass.osgeo.org/documentation/books/)
+
 Referencias
 -----------
 
