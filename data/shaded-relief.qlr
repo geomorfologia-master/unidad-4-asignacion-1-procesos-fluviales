@@ -1,0 +1,212 @@
+<!DOCTYPE qgis-layer-definition>
+<qlr>
+  <layer-tree-group checked="Qt::Checked" expanded="1" name="">
+    <customproperties/>
+    <layer-tree-group checked="Qt::Checked" expanded="1" name="Shaded relief">
+      <customproperties/>
+      <layer-tree-layer source="./dem.tif" checked="Qt::Checked" providerKey="gdal" expanded="0" name="elevation" id="dem_d132353b_19f2_4f22_91a3_3e8626f650d6">
+        <customproperties/>
+      </layer-tree-layer>
+      <layer-tree-layer source="./dem.tif" checked="Qt::Checked" providerKey="gdal" expanded="1" name="hillshades" id="dem_65e3d8f1_85c4_49c6_81ac_47177c0c86b7">
+        <customproperties/>
+      </layer-tree-layer>
+    </layer-tree-group>
+  </layer-tree-group>
+  <maplayers>
+    <maplayer autoRefreshEnabled="0" refreshOnNotifyMessage="" styleCategories="AllStyleCategories" minScale="1e+8" maxScale="0" type="raster" autoRefreshTime="0" hasScaleBasedVisibilityFlag="0" refreshOnNotifyEnabled="0">
+      <extent>
+        <xmin>253740.13089588368893601</xmin>
+        <ymin>2042608.50490007014013827</ymin>
+        <xmax>341262.42748764075804502</xmax>
+        <ymax>2122949.48484840104356408</ymax>
+      </extent>
+      <id>dem_d132353b_19f2_4f22_91a3_3e8626f650d6</id>
+      <datasource>./dem.tif</datasource>
+      <keywordList>
+        <value></value>
+      </keywordList>
+      <layername>elevation</layername>
+      <srs>
+        <spatialrefsys>
+          <proj4>+proj=utm +zone=19 +datum=WGS84 +units=m +no_defs</proj4>
+          <srsid>3103</srsid>
+          <srid>32619</srid>
+          <authid>EPSG:32619</authid>
+          <description>WGS 84 / UTM zone 19N</description>
+          <projectionacronym>utm</projectionacronym>
+          <ellipsoidacronym>WGS84</ellipsoidacronym>
+          <geographicflag>false</geographicflag>
+        </spatialrefsys>
+      </srs>
+      <resourceMetadata>
+        <identifier></identifier>
+        <parentidentifier></parentidentifier>
+        <language></language>
+        <type></type>
+        <title></title>
+        <abstract></abstract>
+        <links/>
+        <fees></fees>
+        <encoding></encoding>
+        <crs>
+          <spatialrefsys>
+            <proj4></proj4>
+            <srsid>0</srsid>
+            <srid>0</srid>
+            <authid></authid>
+            <description></description>
+            <projectionacronym></projectionacronym>
+            <ellipsoidacronym></ellipsoidacronym>
+            <geographicflag>false</geographicflag>
+          </spatialrefsys>
+        </crs>
+        <extent/>
+      </resourceMetadata>
+      <provider>gdal</provider>
+      <noData>
+        <noDataList useSrcNoData="1" bandNo="1"/>
+      </noData>
+      <map-layer-style-manager current="predeterminado">
+        <map-layer-style name="predeterminado"/>
+      </map-layer-style-manager>
+      <flags>
+        <Identifiable>1</Identifiable>
+        <Removable>1</Removable>
+        <Searchable>1</Searchable>
+      </flags>
+      <customproperties>
+        <property value="false" key="WMSBackgroundLayer"/>
+        <property value="false" key="WMSPublishDataSourceUrl"/>
+        <property value="0" key="embeddedWidgets/count"/>
+        <property value="Value" key="identify/format"/>
+      </customproperties>
+      <pipe>
+        <rasterrenderer type="singlebandpseudocolor" alphaBand="-1" band="1" classificationMax="3100" opacity="1" classificationMin="100">
+          <rasterTransparency/>
+          <minMaxOrigin>
+            <limits>None</limits>
+            <extent>WholeRaster</extent>
+            <statAccuracy>Estimated</statAccuracy>
+            <cumulativeCutLower>0.02</cumulativeCutLower>
+            <cumulativeCutUpper>0.98</cumulativeCutUpper>
+            <stdDevFactor>2</stdDevFactor>
+          </minMaxOrigin>
+          <rastershader>
+            <colorrampshader classificationMode="2" colorRampType="DISCRETE" clip="0">
+              <colorramp type="cpt-city" name="[source]">
+                <prop v="0" k="inverted"/>
+                <prop v="cpt-city" k="rampType"/>
+                <prop v="grass/elevation" k="schemeName"/>
+                <prop v="" k="variantName"/>
+              </colorramp>
+              <item label="&lt;= 300" alpha="255" color="#00bfbf" value="300"/>
+              <item label="300 - 500" alpha="255" color="#00d67b" value="500"/>
+              <item label="500 - 700" alpha="255" color="#00ed36" value="700"/>
+              <item label="700 - 900" alpha="255" color="#12ff00" value="900"/>
+              <item label="900 - 1100" alpha="255" color="#6dff00" value="1100"/>
+              <item label="1100 - 1300" alpha="255" color="#c9ff00" value="1300"/>
+              <item label="1300 - 1500" alpha="255" color="#ffed00" value="1500"/>
+              <item label="1500 - 1700" alpha="255" color="#ffbf00" value="1700"/>
+              <item label="1700 - 1900" alpha="255" color="#ff9100" value="1900"/>
+              <item label="1900 - 2100" alpha="255" color="#f27f0d" value="2100"/>
+              <item label="2100 - 2300" alpha="255" color="#db7f24" value="2300"/>
+              <item label="2300 - 2500" alpha="255" color="#c47f3a" value="2500"/>
+              <item label="2500 - 2700" alpha="255" color="#8e6032" value="2700"/>
+              <item label="2700 - 2900" alpha="255" color="#513a23" value="2900"/>
+              <item label="> 2900" alpha="255" color="#141414" value="inf"/>
+            </colorrampshader>
+          </rastershader>
+        </rasterrenderer>
+        <brightnesscontrast contrast="0" brightness="0"/>
+        <huesaturation colorizeBlue="128" colorizeStrength="100" grayscaleMode="0" colorizeGreen="128" colorizeOn="0" saturation="0" colorizeRed="255"/>
+        <rasterresampler zoomedInResampler="cubic" maxOversampling="2" zoomedOutResampler="bilinear"/>
+      </pipe>
+      <blendMode>6</blendMode>
+    </maplayer>
+    <maplayer autoRefreshEnabled="0" refreshOnNotifyMessage="" styleCategories="AllStyleCategories" minScale="1e+8" maxScale="0" type="raster" autoRefreshTime="0" hasScaleBasedVisibilityFlag="0" refreshOnNotifyEnabled="0">
+      <extent>
+        <xmin>253740.13089588368893601</xmin>
+        <ymin>2042608.50490007014013827</ymin>
+        <xmax>341262.42748764075804502</xmax>
+        <ymax>2122949.48484840104356408</ymax>
+      </extent>
+      <id>dem_65e3d8f1_85c4_49c6_81ac_47177c0c86b7</id>
+      <datasource>./dem.tif</datasource>
+      <keywordList>
+        <value></value>
+      </keywordList>
+      <layername>hillshades</layername>
+      <srs>
+        <spatialrefsys>
+          <proj4>+proj=utm +zone=19 +datum=WGS84 +units=m +no_defs</proj4>
+          <srsid>3103</srsid>
+          <srid>32619</srid>
+          <authid>EPSG:32619</authid>
+          <description>WGS 84 / UTM zone 19N</description>
+          <projectionacronym>utm</projectionacronym>
+          <ellipsoidacronym>WGS84</ellipsoidacronym>
+          <geographicflag>false</geographicflag>
+        </spatialrefsys>
+      </srs>
+      <resourceMetadata>
+        <identifier></identifier>
+        <parentidentifier></parentidentifier>
+        <language></language>
+        <type></type>
+        <title></title>
+        <abstract></abstract>
+        <links/>
+        <fees></fees>
+        <encoding></encoding>
+        <crs>
+          <spatialrefsys>
+            <proj4></proj4>
+            <srsid>0</srsid>
+            <srid>0</srid>
+            <authid></authid>
+            <description></description>
+            <projectionacronym></projectionacronym>
+            <ellipsoidacronym></ellipsoidacronym>
+            <geographicflag>true</geographicflag>
+          </spatialrefsys>
+        </crs>
+        <extent/>
+      </resourceMetadata>
+      <provider>gdal</provider>
+      <noData>
+        <noDataList useSrcNoData="1" bandNo="1"/>
+      </noData>
+      <map-layer-style-manager current="predeterminado">
+        <map-layer-style name="predeterminado"/>
+      </map-layer-style-manager>
+      <flags>
+        <Identifiable>1</Identifiable>
+        <Removable>1</Removable>
+        <Searchable>1</Searchable>
+      </flags>
+      <customproperties>
+        <property value="false" key="WMSBackgroundLayer"/>
+        <property value="false" key="WMSPublishDataSourceUrl"/>
+        <property value="0" key="embeddedWidgets/count"/>
+        <property value="Value" key="identify/format"/>
+      </customproperties>
+      <pipe>
+        <rasterrenderer azimuth="315" multidirection="0" type="hillshade" alphaBand="-1" angle="45" band="1" opacity="0.599" zfactor="1">
+          <rasterTransparency/>
+          <minMaxOrigin>
+            <limits>None</limits>
+            <extent>WholeRaster</extent>
+            <statAccuracy>Estimated</statAccuracy>
+            <cumulativeCutLower>0.02</cumulativeCutLower>
+            <cumulativeCutUpper>0.98</cumulativeCutUpper>
+            <stdDevFactor>2</stdDevFactor>
+          </minMaxOrigin>
+        </rasterrenderer>
+        <brightnesscontrast contrast="0" brightness="0"/>
+        <huesaturation colorizeBlue="128" colorizeStrength="100" grayscaleMode="0" colorizeGreen="128" colorizeOn="0" saturation="0" colorizeRed="255"/>
+        <rasterresampler zoomedInResampler="cubic" maxOversampling="2" zoomedOutResampler="bilinear"/>
+      </pipe>
+      <blendMode>0</blendMode>
+    </maplayer>
+  </maplayers>
+</qlr>

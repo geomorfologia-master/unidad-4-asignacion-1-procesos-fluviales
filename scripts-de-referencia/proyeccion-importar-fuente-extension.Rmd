@@ -1,0 +1,95 @@
+---
+title: "Introducción a rgrass7, interfaz entre GRASS GIS 7 y R. Crear región de GRASS"
+output: github_document
+bibliography: ../biblio.bib
+csl: ../apa.csl
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  collapse=TRUE,
+  fig.path = "img/",
+  eval = T
+)
+```
+
+<!-- Este .md fue generado a partir del .Rmd homónimo. Edítese el .Rmd -->
+
+## Paquete, región
+
+Más información en [Introducción a rgrass7, interfaz entre GRASS GIS 7 y R. Crear región de GRASS](intro-rgrass.md)
+
+```{r}
+library(rgrass7)
+gisdbase <- 'grass-data-test' #Base de datos de GRASS GIS
+wd <- getwd() #Directorio de trabajo
+wd
+loc <- initGRASS(gisBase = "/usr/lib/grass78/",
+                 home = wd,
+                 gisDbase = paste(wd, gisdbase, sep = '/'),
+                 location = 'rdom',
+                 mapset = "PERMANENT",
+                 override = TRUE)
+```
+
+## Definir proyección
+
+```{r}
+#Muestra la definición de la región
+#Si sólo se ha ejecutado una sola vez, mostrará extensión y proyección indefinidas
+gmeta()
+
+#Definir ruta del DEM
+dem <- 'data/dem.tif'
+
+#Definir la proyección de la región basada en DEM
+execGRASS(
+  "g.proj",
+  flags = c('t','c'),
+  georef=dem)
+
+#Muestra la definición de la región modificada
+gmeta()
+```
+
+## Importar fuente
+
+
+```{r}
+#r.in.gdal importa la fuente a GRASS
+execGRASS(
+  "r.in.gdal",
+  flags=c('overwrite','quiet'),
+  parameters=list(
+    input=dem,
+    output="dem"
+  )
+)
+
+#Actualizar la extensión de la región al DEM, sólo por precaución
+execGRASS(
+  "g.region",
+  parameters=list(
+    raster = "dem",
+    align = "dem"
+  )
+)
+
+#Muestra la definición de la región. Debe coincidir con la anterior
+gmeta()
+```
+
+
+
+
+
+## Actualizar extensión de la región
+
+```{r}
+
+```
+
+## Referencias

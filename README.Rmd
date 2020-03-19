@@ -16,6 +16,8 @@ knitr::opts_chunk$set(
 )
 ```
 
+<!-- Este .md fue generado a partir del .Rmd homónimo. Edítese el .Rmd -->
+
 # Geomorfología. Tema 4. Procesos fluviales
 
 ## Dos notas
@@ -62,7 +64,7 @@ invisible(purrr::map(
 
 ## Asignaciones a cada estudiante
 
-### Coordenadas de cuencas asignadas para ejercicio 1
+### Coordenadas de cuencas asignadas para ejercicio 3
 
 ```{r}
  # abreviatura         corte                         ruta
@@ -86,7 +88,7 @@ Dentro del bloque de código a continuación, carga el paquete `rgrass7` y crea 
 
 ```
 
-### EJERCICIO 2: Definir proyección de región, importar DEM a GRASS GIS, actualizar región
+### EJERCICIO 2: Definir proyección de la región de GRASS GIS, importar fuente y utilizarla para definir extensión y resolución
 
 [**Vídeo de referencia**]()
 
