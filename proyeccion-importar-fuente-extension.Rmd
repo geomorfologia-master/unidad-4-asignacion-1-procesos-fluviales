@@ -7,7 +7,7 @@ editor_options:
   chunk_output_type: console
 ---
 
-```{r setup, include=FALSE}
+```{r, include=FALSE}
 knitr::opts_chunk$set(
   echo = TRUE,
   collapse=TRUE,
@@ -18,22 +18,15 @@ knitr::opts_chunk$set(
 
 <!-- Este .md fue generado a partir del .Rmd homónimo. Edítese el .Rmd -->
 
-## Cargar paquete, activar/crear región
+<!-- ## Retomar región de GRASS GIS creada en pasos previos -->
 
-Más información en [Introducción a rgrass7, interfaz entre GRASS GIS 7 y R. Crear región de GRASS](intro-rgrass.md)
-
-```{r}
-library(rgrass7)
-gisdbase <- 'grass-data-test' #Base de datos de GRASS GIS
-wd <- getwd() #Directorio de trabajo
-wd
-loc <- initGRASS(gisBase = "/usr/lib/grass78/",
-                 home = wd,
-                 gisDbase = paste(wd, gisdbase, sep = '/'),
-                 location = 'rdom',
-                 mapset = "PERMANENT",
-                 override = T
-                 )
+```{r, include=FALSE}
+source(
+  knitr::purl(
+    'intro-rgrass.Rmd',
+    output=tempfile()
+  )
+)
 ```
 
 ## Definir proyección basado en una fuente externa, en este caso, el DEM MERIT

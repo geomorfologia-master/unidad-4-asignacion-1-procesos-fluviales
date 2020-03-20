@@ -2,28 +2,7 @@ Definir proyección de la región de GRASS GIS, importar fuente y utilizarla par
 ================
 
 <!-- Este .md fue generado a partir del .Rmd homónimo. Edítese el .Rmd -->
-Cargar paquete, activar/crear región
-------------------------------------
-
-Más información en [Introducción a rgrass7, interfaz entre GRASS GIS 7 y R. Crear región de GRASS](intro-rgrass.md)
-
-``` r
-library(rgrass7)
-## Loading required package: XML
-## GRASS GIS interface loaded with GRASS version: (GRASS not running)
-gisdbase <- 'grass-data-test' #Base de datos de GRASS GIS
-wd <- getwd() #Directorio de trabajo
-wd
-## [1] "/home/jr/unidad-4-asignacion-1-procesos-fluviales/scripts-de-referencia"
-loc <- initGRASS(gisBase = "/usr/lib/grass78/",
-                 home = wd,
-                 gisDbase = paste(wd, gisdbase, sep = '/'),
-                 location = 'rdom',
-                 mapset = "PERMANENT",
-                 override = T
-                 )
-```
-
+<!-- ## Retomar región de GRASS GIS creada en pasos previos -->
 Definir proyección basado en una fuente externa, en este caso, el DEM MERIT
 ---------------------------------------------------------------------------
 
@@ -33,7 +12,7 @@ Definir proyección basado en una fuente externa, en este caso, el DEM MERIT
 #Muestra la definición de la región
 #Si no se ha definido antes, la región mostrará extensión y proyección indefinidas
 gmeta()
-## gisdbase    /home/jr/unidad-4-asignacion-1-procesos-fluviales/scripts-de-referencia/grass-data-test 
+## gisdbase    /home/jr/unidad-4-asignacion-1-procesos-fluviales/grass-data-test 
 ## location    rdom 
 ## mapset      PERMANENT 
 ## rows        1 
@@ -61,7 +40,7 @@ execGRASS(
 
 #Muestra la definición de la región modificada
 gmeta()
-## gisdbase    /home/jr/unidad-4-asignacion-1-procesos-fluviales/scripts-de-referencia/grass-data-test 
+## gisdbase    /home/jr/unidad-4-asignacion-1-procesos-fluviales/grass-data-test 
 ## location    rdom 
 ## mapset      PERMANENT 
 ## rows        895 
@@ -109,7 +88,7 @@ Mostrar la definición de la región
 
 ``` r
 gmeta()
-## gisdbase    /home/jr/unidad-4-asignacion-1-procesos-fluviales/scripts-de-referencia/grass-data-test 
+## gisdbase    /home/jr/unidad-4-asignacion-1-procesos-fluviales/grass-data-test 
 ## location    rdom 
 ## mapset      PERMANENT 
 ## rows        895 
