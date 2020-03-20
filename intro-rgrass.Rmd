@@ -1,8 +1,8 @@
 ---
 title: "Introducción a rgrass7, interfaz entre GRASS GIS 7 y R. Crear región de GRASS"
 output: github_document
-bibliography: ../biblio.bib
-csl: ../apa.csl
+bibliography: biblio.bib
+csl: apa.csl
 editor_options: 
   chunk_output_type: console
 ---
@@ -28,7 +28,7 @@ library(rgrass7)
 
 ## Región de GRASS
 
-![](../img/organizacion-grass-gis.jpg)
+![](img/organizacion-grass-gis.jpg)
 Organización de directorio, localidad, conjuntos de mapas, capas vectoriales y ráster, según @neteler2007open
 
 ```{r}

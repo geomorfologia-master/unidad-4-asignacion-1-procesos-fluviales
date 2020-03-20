@@ -1,8 +1,8 @@
 ---
 title: "Definir proyección de la región de GRASS GIS, importar fuente y utilizarla para definir extensión y resolución. Cómo ver la ayuda de las funciones"
 output: github_document
-bibliography: ../biblio.bib
-csl: ../apa.csl
+bibliography: biblio.bib
+csl: apa.csl
 editor_options: 
   chunk_output_type: console
 ---

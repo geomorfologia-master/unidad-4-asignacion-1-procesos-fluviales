@@ -1,8 +1,8 @@
 ---
 title: "Explorar datos espaciales básicos entre GRASS y R"
 output: github_document
-bibliography: ../biblio.bib
-csl: ../apa.csl
+bibliography: biblio.bib
+csl: apa.csl
 editor_options: 
   chunk_output_type: console
 ---
