@@ -1,6 +1,7 @@
 Introducción a rgrass7, interfaz entre GRASS GIS 7 y R. Crear región de GRASS
 ================
 
+<!-- Este .md fue generado a partir del .Rmd homónimo. Edítese el .Rmd -->
 Paquetes
 --------
 

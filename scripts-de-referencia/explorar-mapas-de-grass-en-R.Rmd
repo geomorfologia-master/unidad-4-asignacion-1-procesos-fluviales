@@ -1,5 +1,5 @@
 ---
-title: "Explorar mapas de GRASS en R"
+title: "Explorar datos espaciales básicos entre GRASS y R"
 output: github_document
 bibliography: ../biblio.bib
 csl: ../apa.csl
@@ -7,7 +7,7 @@ editor_options:
   chunk_output_type: console
 ---
 
-```{r setup, include=FALSE}
+```{r, include=FALSE}
 knitr::opts_chunk$set(
   echo = TRUE,
   collapse=TRUE,
@@ -18,13 +18,24 @@ knitr::opts_chunk$set(
 
 <!-- Este .md fue generado a partir del .Rmd homónimo. Edítese el .Rmd -->
 
-## Cargar paquete, activar/crear región
+<!-- ## Retomar región de GRASS GIS creada en pasos previos -->
 
-Más información en [Introducción a rgrass7, interfaz entre GRASS GIS 7 y R. Crear región de GRASS](intro-rgrass.md)
+```{r, include=FALSE}
+source(
+  knitr::purl(
+    'proyeccion-importar-fuente-extension.Rmd',
+    output=tempfile()
+  )
+)
+```
+
+## Cargar paquete, activar región
+
+Base de datos de GRASS GIS creada en el [paso previo](proyeccion-importar-fuente-extension.md)
 
 ```{r}
 library(rgrass7)
-gisdbase <- 'grass-data-test' #Base de datos de GRASS GIS
+gisdbase <- 'grass-data-test'
 wd <- getwd() #Directorio de trabajo
 wd
 loc <- initGRASS(gisBase = "/usr/lib/grass78/",
@@ -48,25 +59,47 @@ execGRASS(
 )
 ```
 
-## Cargar a R un mapa ráster y otro vectorial, y visualizarlos conjuntamente
+## Cargar en R el DEM (mapa ráster)
 
 ```{r}
 library(sp)
 use_sp()
-r <- readRAST('dem')
-v <- readVECT('dem_extent')
-plot(r)
-plot(v, add=T, border='red', lwd=8)
+dem_sp <- readRAST('dem')
+plot(dem_sp)
 ```
 
-## Cargar a R el mapa vectorial de una cuenca que se encuentra alojado fuera de GRASS
+## Cargar a R el mapa vectorial de una cuenca que se encuentra alojado fuera de GRASS, hacer el plot y representar la cuenca del arroyo Pantuflas superpuesta
 
 ```{r}
 library(sf)
-cuenca <- 'data/cuenca_arroyo_pantuflas.geojson'
-v <- 
+rutapantuflas <- 'data/cuenca_arroyo_pantuflas.geojson'
+pantuflas <- st_read(rutapantuflas)
+plot(dem_sp)
+plot(pantuflas, add=T, col='transparent', border='black', lwd=5)
 ```
 
+## Analizar el DEM dentro de la cuenca del Pantuflas
+
+```{r}
+library(raster)
+dem_r0 <- raster(dem_sp)
+dem_r1 <- crop(dem_r0, pantuflas)
+dem_pant <- mask(dem_r1, pantuflas)
+plot(dem_pant)
+evals_pant <- dem_pant[]
+summary(na.omit(evals_pant))
+hist(evals_pant)
+```
+
+## Obtener variables de terreno básicas
+
+```{r}
+pend_pant <- terrain(x = dem_pant, opt = 'slope', unit = 'degrees')
+plot(pend_pant)
+pvals_pant <- pend_pant[]
+summary(na.omit(pvals_pant))
+hist(pvals_pant)
+```
 
 ## Limpiar archivo de bloqueo del conjunto de mapas de GRASS
 
