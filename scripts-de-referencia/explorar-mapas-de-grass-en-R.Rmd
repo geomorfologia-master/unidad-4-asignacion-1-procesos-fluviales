@@ -48,7 +48,7 @@ execGRASS(
 )
 ```
 
-## Cargar un mapa ráster a R y visualizarlo
+## Cargar a R un mapa ráster y otro vectorial, y visualizarlos conjuntamente
 
 ```{r}
 library(sp)
@@ -59,7 +59,14 @@ plot(r)
 plot(v, add=T, border='red', lwd=8)
 ```
 
-## 
+## Cargar a R el mapa vectorial de una cuenca que se encuentra alojado fuera de GRASS
+
+```{r}
+library(sf)
+cuenca <- 'data/cuenca_arroyo_pantuflas.geojson'
+v <- 
+```
+
 
 ## Limpiar archivo de bloqueo del conjunto de mapas de GRASS
 

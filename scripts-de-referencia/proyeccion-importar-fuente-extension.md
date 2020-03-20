@@ -24,8 +24,10 @@ loc <- initGRASS(gisBase = "/usr/lib/grass78/",
                  )
 ```
 
-Definir proyección basado en una fuente externa, en este caso, el DEM
----------------------------------------------------------------------
+Definir proyección basado en una fuente externa, en este caso, el DEM MERIT
+---------------------------------------------------------------------------
+
+-   [Fuente del DEM](http://hydro.iis.u-tokyo.ac.jp/~yamadai/MERIT_DEM/)
 
 ``` r
 #Muestra la definición de la región
@@ -34,15 +36,16 @@ gmeta()
 ## gisdbase    /home/jr/unidad-4-asignacion-1-procesos-fluviales/scripts-de-referencia/grass-data-test 
 ## location    rdom 
 ## mapset      PERMANENT 
-## rows        1 
-## columns     1 
-## north       1 
-## south       0 
-## west        0 
-## east        1 
-## nsres       1 
-## ewres       1 
-## projection  NA
+## rows        895 
+## columns     975 
+## north       2122949 
+## south       2042609 
+## west        253740.1 
+## east        341262.4 
+## nsres       89.76646 
+## ewres       89.76646 
+## projection  +proj=utm +no_defs +zone=19 +a=6378137 +rf=298.257223563
+## +towgs84=0.000,0.000,0.000 +type=crs +to_meter=1
 
 #Definir ruta del DEM
 dem <- 'data/dem.tif'
@@ -52,9 +55,6 @@ execGRASS(
   cmd = 'g.proj',
   flags = c('t','c'),
   georef=dem)
-## Default region was updated to the new projection, but if you have multiple
-## mapsets `g.region -d` should be run in each to update the region from the
-## default
 ## Projection information updated
 
 #Muestra la definición de la región modificada
@@ -87,6 +87,11 @@ execGRASS(
     output='dem'
   )
 )
+## Warning in execGRASS(cmd = "r.in.gdal", flags = c("overwrite", "quiet"), : The command:
+## r.in.gdal --overwrite --quiet input=data/dem.tif output=dem
+## produced at least one warning during execution:
+## WARNING: Raster map <dem> already exists and will be overwritten
+## WARNING: Raster map <dem> already exists and will be overwritten
 ```
 
 Actualizar la extensión de la región al DEM, sólo por precaución
@@ -135,6 +140,11 @@ execGRASS(
     output='dem_extent'
   )
 )
+## Warning in execGRASS(cmd = "v.in.ogr", flags = c("overwrite", "quiet"), : The command:
+## v.in.ogr --overwrite --quiet input=data/dem-extension.geojson output=dem_extent
+## produced at least one warning during execution:
+## WARNING: Vector map <dem_extent> already exists and will be overwritten
+## WARNING: Vector map <dem_extent> already exists and will be overwritten
 ```
 
 Imprimir lista de mapas ráster y vectoriales dentro en la región/localización activa

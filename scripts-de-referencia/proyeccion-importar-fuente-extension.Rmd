@@ -36,7 +36,9 @@ loc <- initGRASS(gisBase = "/usr/lib/grass78/",
                  )
 ```
 
-## Definir proyección basado en una fuente externa, en este caso, el DEM
+## Definir proyección basado en una fuente externa, en este caso, el DEM MERIT
+
+* [Fuente del DEM](http://hydro.iis.u-tokyo.ac.jp/~yamadai/MERIT_DEM/)
 
 ```{r}
 #Muestra la definición de la región
