@@ -1,5 +1,5 @@
 ---
-title: "Introducción a rgrass7, interfaz entre GRASS GIS 7 y R. Crear región de GRASS"
+title: "Definir proyección de la región de GRASS GIS, importar fuente y utilizarla para definir extensión y resolución. Cómo ver la ayuda de las funciones"
 output: github_document
 bibliography: ../biblio.bib
 csl: ../apa.csl
@@ -18,7 +18,7 @@ knitr::opts_chunk$set(
 
 <!-- Este .md fue generado a partir del .Rmd homónimo. Edítese el .Rmd -->
 
-## Paquete, región
+## Cargar paquete, activar/crear región
 
 Más información en [Introducción a rgrass7, interfaz entre GRASS GIS 7 y R. Crear región de GRASS](intro-rgrass.md)
 
@@ -32,14 +32,15 @@ loc <- initGRASS(gisBase = "/usr/lib/grass78/",
                  gisDbase = paste(wd, gisdbase, sep = '/'),
                  location = 'rdom',
                  mapset = "PERMANENT",
-                 override = TRUE)
+                 override = T
+                 )
 ```
 
-## Definir proyección
+## Definir proyección basado en una fuente externa, en este caso, el DEM
 
 ```{r}
 #Muestra la definición de la región
-#Si sólo se ha ejecutado una sola vez, mostrará extensión y proyección indefinidas
+#Si no se ha definido antes, la región mostrará extensión y proyección indefinidas
 gmeta()
 
 #Definir ruta del DEM
@@ -47,7 +48,7 @@ dem <- 'data/dem.tif'
 
 #Definir la proyección de la región basada en DEM
 execGRASS(
-  "g.proj",
+  cmd = 'g.proj',
   flags = c('t','c'),
   georef=dem)
 
@@ -55,41 +56,131 @@ execGRASS(
 gmeta()
 ```
 
-## Importar fuente
-
+## Importar mapa raster
 
 ```{r}
 #r.in.gdal importa la fuente a GRASS
 execGRASS(
-  "r.in.gdal",
+  cmd = 'r.in.gdal',
   flags=c('overwrite','quiet'),
   parameters=list(
     input=dem,
-    output="dem"
+    output='dem'
   )
 )
+```
 
-#Actualizar la extensión de la región al DEM, sólo por precaución
+## Actualizar la extensión de la región al DEM, sólo por precaución
+
+```{r}
 execGRASS(
-  "g.region",
+  cmd = 'g.region',
   parameters=list(
-    raster = "dem",
-    align = "dem"
+    raster = 'dem',
+    align = 'dem'
   )
 )
+```
 
-#Muestra la definición de la región. Debe coincidir con la anterior
+## Mostrar la definición de la región
+
+```{r}
 gmeta()
 ```
 
-
-
-
-
-## Actualizar extensión de la región
+## Para completar, importar un mapa vectorial también
 
 ```{r}
-
+demext <- 'data/dem-extension.geojson'
+execGRASS(
+  cmd = 'v.in.ogr',
+  flags=c('overwrite','quiet'),
+  parameters=list(
+    input=demext,
+    output='dem_extent'
+  )
+)
 ```
+
+## Imprimir lista de mapas ráster y vectoriales dentro en la región/localización activa
+
+```{r}
+execGRASS(
+  'g.list',
+  flags = 't',
+  parameters = list(
+    type = c('raster', 'vector')
+  )
+)
+```
+
+## Ver los addons disponibles en el repositorio oficial de GRASS GIS, incluyendo descripción
+
+```{r}
+execGRASS(
+  cmd = 'g.extension',
+  flags = 'c'
+)
+```
+
+## Consultar la ayuda de una función
+
+* Alternativa 1
+
+```{r}
+parseGRASS("r.in.gdal")
+```
+
+* Alternativa 2
+
+```{r, eval=FALSE}
+system('r.in.gdal --help')
+
+Imports raster data into a GRASS raster map using GDAL library.
+
+Usage:
+ r.in.gdal [-ojeflakcrp] input=name output=name
+   [band=value[,value,...]] [memory=value] [target=name] [title=phrase]
+   [offset=value] [num_digits=value] [map_names_file=name] [location=name]
+   [table=file] [gdal_config=string] [gdal_doo=string] [--overwrite]
+   [--help] [--verbose] [--quiet] [--ui]
+
+Flags:
+  -o   Override projection check (use current location's projection)
+  -j   Perform projection check only and exit
+  -e   Extend region extents based on new dataset
+  -f   List supported formats and exit
+  -l   Force Lat/Lon maps to fit into geographic coordinates (90N,S; 180E,W)
+  -a   Auto-adjustment for lat/lon
+  -k   Keep band numbers instead of using band color names
+  -c   Create the location specified by the "location" parameter and exit. Do not import the raster file.
+  -r   Limit import to the current region
+  -p   Print number of bands and exit
+
+Parameters:
+           input   Name of raster file to be imported
+          output   Name for output raster map
+            band   Band(s) to select (default is all bands)
+          memory   Maximum memory to be used (in MB)
+                   default: 300
+          target   Name of GCPs target location
+           title   Title for resultant raster map
+          offset   Offset to be added to band numbers
+                   default: 0
+      num_digits   Zero-padding of band number by filling with leading zeros up to given number
+                   default: 0
+  map_names_file   Name of the output file that contains the imported map names
+        location   Name for new location to create
+           table   File prefix for raster attribute tables
+     gdal_config   GDAL configuration options
+        gdal_doo   GDAL dataset open options
+```
+
+## Limpiar archivo de bloqueo del conjunto de mapas de GRASS
+
+```{r}
+unlink_.gislock()
+```
+
 
 ## Referencias

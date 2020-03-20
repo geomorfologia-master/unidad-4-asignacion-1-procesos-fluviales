@@ -88,15 +88,22 @@ Dentro del bloque de código a continuación, carga el paquete `rgrass7` y crea 
 
 ```
 
-### EJERCICIO 2: Definir proyección de la región de GRASS GIS, importar fuente y utilizarla para definir extensión y resolución
+### EJERCICIO 2: Definir proyección de la región de GRASS GIS, importar fuente y utilizarla para definir extensión y resolución. Cómo ver la ayuda de las funciones
 
 [**Vídeo de referencia**]()
 
-[**Script de referencia**](scripts-de-referencia/intro-rgrass.md)
+[**Script de referencia**](scripts-de-referencia/proyeccion-importar-fuente-extension.md)
+
+
+### EJERCICIO 3: Explorar mapas de GRASS en R
+
+[**Vídeo de referencia**]()
+
+[**Script de referencia**](scripts-de-referencia/explorar-mapas-de-grass-en-R.md)
 
 
 
-### EJERCICIO 3: Extracción de una cuenca hidrográfica
+### EJERCICIO 4: Extracción de una cuenca hidrográfica
 
 [**Vídeo de referencia**]()
 
