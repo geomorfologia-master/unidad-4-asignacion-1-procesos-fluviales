@@ -14,6 +14,7 @@ knitr::opts_chunk$set(
   fig.path = "img/",
   eval = T
 )
+options(knitr.duplicate.label = "allow")
 ```
 
 <!-- Este .md fue generado a partir del .Rmd homónimo. Edítese el .Rmd -->
@@ -27,24 +28,6 @@ source(
     output=tempfile()
   )
 )
-```
-
-## Cargar paquete, activar región
-
-Base de datos de GRASS GIS creada en el [paso previo](proyeccion-importar-fuente-extension.md)
-
-```{r}
-library(rgrass7)
-gisdbase <- 'grass-data-test'
-wd <- getwd() #Directorio de trabajo
-wd
-loc <- initGRASS(gisBase = "/usr/lib/grass78/",
-                 home = wd,
-                 gisDbase = paste(wd, gisdbase, sep = '/'),
-                 location = 'rdom',
-                 mapset = "PERMANENT",
-                 override = T
-                 )
 ```
 
 ## Imprimir lista de mapas ráster y vectoriales dentro en la región/localización activa
@@ -61,10 +44,11 @@ execGRASS(
 
 ## Cargar en R el DEM (mapa ráster)
 
-```{r}
+```{r, results='hide'}
 library(sp)
 use_sp()
 dem_sp <- readRAST('dem')
+op <- par()
 plot(dem_sp)
 ```
 
@@ -75,7 +59,7 @@ library(sf)
 rutapantuflas <- 'data/cuenca_arroyo_pantuflas.geojson'
 pantuflas <- st_read(rutapantuflas)
 plot(dem_sp)
-plot(pantuflas, add=T, col='transparent', border='black', lwd=5)
+plot(pantuflas, add=T, col='transparent', border='black', lwd=5);par(op[c('mfrow','mar')])
 ```
 
 ## Analizar el DEM dentro de la cuenca del Pantuflas
@@ -86,19 +70,65 @@ dem_r0 <- raster(dem_sp)
 dem_r1 <- crop(dem_r0, pantuflas)
 dem_pant <- mask(dem_r1, pantuflas)
 plot(dem_pant)
-evals_pant <- dem_pant[]
-summary(na.omit(evals_pant))
-hist(evals_pant)
+summary(dem_pant)
+hist(dem_pant)
 ```
 
-## Obtener variables de terreno básicas
+## Obtener variables de terreno básicas con el paquete `raster` dentro de R
 
 ```{r}
 pend_pant <- terrain(x = dem_pant, opt = 'slope', unit = 'degrees')
 plot(pend_pant)
-pvals_pant <- pend_pant[]
-summary(na.omit(pvals_pant))
-hist(pvals_pant)
+summary(pend_pant)
+hist(pend_pant)
+```
+
+## Obtener la misma variable de terreno con GRASS GIS
+
+```{r, results='hide'}
+writeVECT(as_Spatial(pantuflas), 'pantuflas', v.in.ogr_flags='quiet')
+execGRASS(
+  "g.region",
+  parameters=list(
+    vector = "pantuflas"
+  )
+)
+execGRASS(
+  "r.mask",
+  flags = c('verbose','overwrite','quiet'),
+  parameters = list(
+    vector = 'pantuflas'
+  )
+)
+execGRASS(
+  cmd = 'r.slope.aspect',
+  flags = c('overwrite','quiet'),
+  parameters = list(
+    elevation='dem',
+    slope='slope',
+    aspect='aspect',
+    pcurvature='pcurv',
+    tcurvature='tcurv')
+  )
+pend_pant_g <- readRAST('slope')
+```
+
+```{r}
+plot(pend_pant_g);par(op[c('mfrow','mar')])
+summary(pend_pant_g)
+summary(pend_pant)
+gmeta()
+execGRASS(
+  "g.region",
+  parameters=list(
+    raster = "dem"
+  )
+)
+execGRASS(
+  "r.mask",
+  flags = c('r','quiet')
+)
+gmeta()
 ```
 
 ## Limpiar archivo de bloqueo del conjunto de mapas de GRASS
