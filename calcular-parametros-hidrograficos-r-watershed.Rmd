@@ -1,0 +1,110 @@
+---
+title: "Calcular parámetros hidrográficos con r.watershed. Visualizar con leaflet"
+output: html_document
+bibliography: biblio.bib
+csl: apa.csl
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  collapse=TRUE,
+  fig.path = "img/",
+  eval = T
+)
+options(knitr.duplicate.label = "allow")
+```
+
+<!-- Este .md fue generado a partir del .Rmd homónimo. Edítese el .Rmd -->
+
+<!-- ## Retomar región de GRASS GIS creada en pasos previos -->
+
+```{r, include=FALSE}
+source(
+  knitr::purl(
+    'proyeccion-importar-fuente-extension.Rmd',
+    output=tempfile()
+  )
+)
+```
+
+## Imprimir lista de mapas ráster y vectoriales dentro en la región/localización activa
+
+* Nótese que el paquete `rgrass7` no se carga en esta sesión porque el bloque anterior ya lo hace al ejecutar el código contenido en el archivo `proyeccion-importar-fuente-extension.Rmd`
+
+```{r}
+execGRASS(
+  'g.list',
+  flags = 't',
+  parameters = list(
+    type = c('raster', 'vector')
+  )
+)
+```
+
+## Calcular parámetros hidrográficos de interés usando `r.watershed`
+
+```{r}
+execGRASS(
+  "r.watershed",
+  flags = c('overwrite','quiet'),
+  parameters = list(
+    elevation = "dem",
+    accumulation = "accum-de-rwshed",
+    stream = "stream-de-rwshed",
+    drainage = "drainage-dir-de-rwshed",
+    threshold = 80
+  )
+)
+execGRASS(
+  "r.to.vect",
+  flags = c('overwrite','quiet'),
+  parameters = list(
+    input = 'stream-de-rwshed',
+    output = 'stream_de_rwshed',
+    type = 'line'
+  )
+)
+```
+
+## Traer capa a R
+
+```{r, results='hide'}
+library(sp)
+use_sp()
+library(raster)
+dem <- raster(readRAST('dem'))
+stream <- raster(readRAST('stream-de-rwshed'))
+e <- extent(stream)
+e <- as(e, 'SpatialPolygons')
+proj4string(e) <- CRS("+init=epsg:32619")
+e <- spTransform(e, CRSobj = CRS("+init=epsg:4326"))
+```
+
+## Visualizar capas con `leaflet`
+
+```{r}
+library(leaflet)
+library(leafem)
+leaflet() %>%
+  addTiles() %>%
+  addProviderTiles(providers$Stamen.Terrain) %>%
+  addRasterImage(dem, group='DEM', opacity = 0.5) %>%
+  addRasterImage(stream, group='str', opacity = 0.7, method = 'ngb', colors = 'blue') %>% 
+  addLayersControl(
+    overlayGroups = c('DEM','str'),
+    options = layersControlOptions(collapsed=FALSE)) %>% 
+  addHomeButton(extent(e), 'Ver todo')
+```
+
+
+## Limpiar archivo de bloqueo del conjunto de mapas de GRASS
+
+```{r}
+unlink_.gislock()
+```
+
+
+## Referencias
