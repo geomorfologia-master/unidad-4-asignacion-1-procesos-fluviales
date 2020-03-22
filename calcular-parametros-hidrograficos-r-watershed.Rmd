@@ -55,28 +55,29 @@ execGRASS(
     accumulation = "accum-de-rwshed",
     stream = "stream-de-rwshed",
     drainage = "drainage-dir-de-rwshed",
+    basin = 'basins',
+    half_basin = 'half-basins',
     threshold = 80
-  )
-)
-execGRASS(
-  "r.to.vect",
-  flags = c('overwrite','quiet'),
-  parameters = list(
-    input = 'stream-de-rwshed',
-    output = 'stream_de_rwshed',
-    type = 'line'
   )
 )
 ```
 
-## Traer capa a R
+## Traer capas a R
 
 ```{r, results='hide'}
+#Usar Spatial*
 library(sp)
 use_sp()
+#Paquete manejo de los raster
 library(raster)
+#DEM
 dem <- raster(readRAST('dem'))
+#Basins
+basins <- raster(readRAST('basins'))
+#Stream network
 stream <- raster(readRAST('stream-de-rwshed'))
+stream3857 <- projectRaster(stream, crs = CRS("+init=epsg:3857"), method = 'ngb')
+#Generar un vectorial de extensión de capa en EPSG:4326
 e <- extent(stream)
 e <- as(e, 'SpatialPolygons')
 proj4string(e) <- CRS("+init=epsg:32619")
@@ -89,12 +90,15 @@ e <- spTransform(e, CRSobj = CRS("+init=epsg:4326"))
 library(leaflet)
 library(leafem)
 leaflet() %>%
-  addTiles() %>%
-  addProviderTiles(providers$Stamen.Terrain) %>%
+  addProviderTiles(providers$Stamen.Terrain, group = 'terrain') %>%
   addRasterImage(dem, group='DEM', opacity = 0.5) %>%
-  addRasterImage(stream, group='str', opacity = 0.7, method = 'ngb', colors = 'blue') %>% 
+  addRasterImage(
+    ratify(basins),
+    group='basins', opacity = 0.7,
+    colors = sample(rep(RColorBrewer::brewer.pal(12, 'Set3'),1000))) %>% 
+  addRasterImage(stream3857, project = F, group='str', opacity = 0.7, method = 'ngb', colors = 'blue') %>% 
   addLayersControl(
-    overlayGroups = c('DEM','str'),
+    overlayGroups = c('terrain','DEM','basins','str'),
     options = layersControlOptions(collapsed=FALSE)) %>% 
   addHomeButton(extent(e), 'Ver todo')
 ```
