@@ -1,0 +1,132 @@
+---
+title: "Calcular parámetros hidrográficos con r.watershed. Visualizar con leaflet"
+output: html_document
+bibliography: biblio.bib
+csl: apa.csl
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  collapse=TRUE,
+  fig.path = "img/",
+  eval = T
+)
+options(knitr.duplicate.label = "allow")
+```
+
+<!-- Este .md fue generado a partir del .Rmd homónimo. Edítese el .Rmd -->
+
+<!-- ## Retomar región de GRASS GIS creada en pasos previos -->
+
+```{r, include=FALSE}
+source(
+  knitr::purl(
+    'calcular-parametros-hidrograficos-r-watershed.Rmd',
+    output=tempfile()
+  )
+)
+```
+
+## Imprimir lista de mapas ráster y vectoriales dentro en la región/localización activa
+
+* Nótese que los paquetes requeridos en esta sessión (`rgrass7`, `raster`, `leaflet`, `leafem`), fueron en el bloque anterior al ejecutarse el código contenido en el archivo `calcular-parametros-hidrograficos-r-watershed.Rmd`. Igualmente, dicho bloque de código creó todos los objetos necesarios para realizar este tutorial.
+
+```{r}
+execGRASS(
+  'g.list',
+  flags = 't',
+  parameters = list(
+    type = c('raster', 'vector')
+  )
+)
+```
+
+## Obtener las coordenadas de la desembocadura de la cuenca de interés
+
+```{r}
+library(mapview)
+mapview(
+  stream3857, method='ngb', col.regions = 'blue',
+  legend = FALSE, label = FALSE, maxpixels =  910425
+)
+```
+
+## Convertir las coordenadas lat/lon a EPSG:32619
+
+```{r}
+my_trans <- function(coords = NULL) {
+  require(sp)
+  pt <- SpatialPoints(matrix(coords, ncol = 2), CRS("+init=epsg:4326"))
+  foo <- spTransform(pt, CRSobj = CRS("+init=epsg:32619"))
+  bar <- as.vector(coordinates(foo))
+  return(bar)
+}
+pant_out <- my_trans(coords = c(-70.77340,18.90160))
+pant_out
+```
+
+## Extraer la cuenca de interés
+
+```{r}
+execGRASS(
+  "r.water.outlet",
+  flags = c('overwrite','quiet'),
+  parameters = list(
+    input = 'drainage-dir-de-rwshed',
+    output = 'pantuflas-basin',
+    coordinates = pant_out
+  )
+)
+```
+
+## Convertir la cuenca a vectorial en GRASS
+
+```{r}
+execGRASS(
+  "r.to.vect",
+  flags = c('overwrite','quiet'),
+  parameters = list(
+    input = 'pantuflas-basin',
+    output = 'pantuflas_basin',
+    type = 'area'
+  )
+)
+```
+
+## Mostrar lista nuevamente
+
+```{r}
+execGRASS(
+  'g.list',
+  flags = 't',
+  parameters = list(
+    type = c('raster', 'vector')
+  )
+)
+```
+
+## Traer a R la cuenca del arroyo Pantuflas
+
+```{r}
+pant_bas <- readVECT('pantuflas_basin')
+pant_bas
+plot(pant_bas)
+pant_bas4326 <- spTransform(pant_bas, CRSobj = CRS("+init=epsg:4326"))
+leaflet() %>% 
+  addProviderTiles(providers$Stamen.Terrain) %>%
+  addRasterImage(stream, opacity = 0.7, method = 'ngb', colors = 'blue') %>% 
+  addPolygons(data = pant_bas4326) %>% 
+  leafem::addHomeButton(extent(pant_bas4326), 'Ver cuenca')
+```
+
+## Limpiar archivo de bloqueo del conjunto de mapas de GRASS
+
+```{r}
+unlink_.gislock()
+```
+
+
+## Referencias
