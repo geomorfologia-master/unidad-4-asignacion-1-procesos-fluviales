@@ -1,5 +1,5 @@
 ---
-title: "Calcular parámetros hidrográficos con r.watershed. Visualizar con leaflet"
+title: "Extraer una cuenca de drenaje con r.water.outlet. Visualizar con mapview y leaflet"
 output: html_document
 bibliography: biblio.bib
 csl: apa.csl

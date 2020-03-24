@@ -1,0 +1,117 @@
+---
+title: "Extraer una red drenaje con r.stream.extract. Visualizar con mapview y leaflet"
+output: html_document
+bibliography: biblio.bib
+csl: apa.csl
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  collapse=TRUE,
+  fig.path = "img/",
+  eval = T
+)
+options(knitr.duplicate.label = "allow")
+```
+
+<!-- Este .md fue generado a partir del .Rmd homónimo. Edítese el .Rmd -->
+
+<!-- ## Retomar región de GRASS GIS creada en pasos previos -->
+
+```{r, include=FALSE}
+source(
+  knitr::purl(
+    'crear-una-cuenca-con-r-water-outlet.Rmd',
+    output=tempfile()
+  )
+)
+```
+
+## Imprimir lista de mapas ráster y vectoriales dentro en la región/localización activa
+
+* Nótese que los paquetes requeridos en esta sessión (`rgrass7`, `raster`, `leaflet`, `leafem`), fueron en el bloque anterior al ejecutarse el código contenido en el archivo `crear-una-cuenca-con-r-water-outlet.Rmd`. Igualmente, dicho bloque de código creó todos los objetos necesarios para realizar este tutorial.
+
+```{r}
+execGRASS(
+  'g.list',
+  flags = 't',
+  parameters = list(
+    type = c('raster', 'vector')
+  )
+)
+```
+
+## Usar la cuenca del arroyo Pantuflas como máscara
+
+```{r}
+execGRASS(
+  "r.mask",
+  flags = c('verbose','overwrite','quiet'),
+  parameters = list(
+    vector = 'pantuflas_basin'
+  )
+)
+```
+
+## Extraer la red de drenaje de la cuenca de interés
+
+```{r}
+execGRASS(
+  "r.stream.extract",
+  flags = c('overwrite','quiet'),
+  parameters = list(
+    elevation = 'dem',
+    threshold = 80,
+    stream_raster = 'pantuflas-stream-de-rstr',
+    stream_vector = 'pantuflas_stream_de_rstr'
+  )
+)
+```
+
+## Mostrar lista nuevamente
+
+```{r}
+execGRASS(
+  'g.list',
+  flags = 't',
+  parameters = list(
+    type = c('raster', 'vector')
+  )
+)
+```
+
+## Traer a R la red de drenaje del arroyo Pantuflas
+
+```{r}
+pant_net <- readVECT('pantuflas_stream_de_rstr', ignore.stderr = T)
+pant_net
+plot(pant_net)
+pant_net4326 <- spTransform(pant_net, CRSobj = CRS("+init=epsg:4326"))
+pant_net4326
+pant_centroid <- coordinates(rgeos::gCentroid(pant_bas4326))
+pant_centroid
+pant_net_r <- raster(readRAST('pantuflas-stream-de-rstr'))
+pant_net_r
+pant_net_r3857 <- projectRaster(pant_net_r, crs = CRS("+init=epsg:3857"), method = 'ngb')
+pant_net_r3857
+leaflet() %>% 
+  setView(lng = pant_centroid[1], lat = pant_centroid[2], zoom = 11) %>%
+  addProviderTiles(providers$Stamen.Terrain, group = 'terrain') %>%
+  addRasterImage(pant_net_r3857, opacity = 0.7, method = 'ngb', colors = 'grey20', group = 'str_raster') %>% 
+  addPolylines(data = pant_net4326, weight = 3, opacity = 0.7, group = 'str_vect') %>% 
+  leafem::addHomeButton(extent(pant_net4326), 'Ver todo') %>% 
+  addLayersControl(
+    overlayGroups = c('terrain','str_vect','str_raster'),
+    options = layersControlOptions(collapsed=FALSE)) 
+```
+
+## Limpiar archivo de bloqueo del conjunto de mapas de GRASS
+
+```{r}
+unlink_.gislock()
+```
+
+## Referencias
