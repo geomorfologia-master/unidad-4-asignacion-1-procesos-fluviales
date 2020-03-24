@@ -1,5 +1,5 @@
 ---
-title: "Extraer una red drenaje con r.stream.extract. Visualizar con mapview y leaflet"
+title: "Extraer una red drenaje con r.stream.extract. Visualizar con leaflet"
 output: html_document
 bibliography: biblio.bib
 csl: apa.csl
@@ -46,7 +46,7 @@ execGRASS(
 
 ## Usar la cuenca del arroyo Pantuflas como máscara
 
-```{r}
+```{r, results='hide'}
 execGRASS(
   "r.mask",
   flags = c('verbose','overwrite','quiet'),
