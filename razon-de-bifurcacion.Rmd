@@ -35,7 +35,7 @@ $$R_b=\frac{N_u}{N_{u+1}}$$
 
 donde $R_b$ es la razón de bifurcación, $N_u$ es el número de cursos de orden de red $u$, y $N_{u+1}$ es el número de cursos del orden de red inmediatamente mayor.
 
-Sea $N_u=f(u)$. Si graficamos el logaritmo del número de cursos por cada orden de red (según el método de Strahler), notaremos que existe una relación lineal. Este sería un ejemplo con datos reales de la cuenca del arroyo Pantuflas, utilizando el addon de GRASS GIS `r.stream.stats` [@grassrstreamstats]:
+Sea $N_u=f(u)$. Si graficamos el logaritmo del número de cursos por cada orden de red (según el método de Strahler), notaremos que existe una relación lineal. Este sería un ejemplo con datos reales de la cuenca del arroyo Pantuflas (Constanza, República Dominicana), utilizando el addon de GRASS GIS `r.stream.stats` [@grassrstreamstats]:
 
 ```{r, eval=FALSE}
 execGRASS(
@@ -57,24 +57,78 @@ plot(num_of_streams~order, data=d, log="y")
 
 > El eje $y$ es log10.
 
-De esta manera, podemos formular la función $log{N_u}=mu$, donde el $u$ es el orden de red y $m$ una pendiente por determinar. Dicha pendiente, en teoría, siempre es negativa, puesto que a mayor orden de red, menor el número de cursos, como de hecho ocurre en el ejemplo graficado. La fórmula para obtener dicha pendiente es:
+Formulemos entonces la siguiente función:
 
-$$m=\frac{log{N_{u+1}}-log{N_u}}{({u+1})-{u}}$$
+$$log_{10}N_u=mu$$
 
-$$m=\frac{log{N_{u+1}}-log{N_u}}{1}$$
+donde $N_u$ es el número de cursos de orden $u$, y $m$ es una pendiente por determinar (la base es irrelevante siempre que se utilice la misma de manera consistente a lo largo del ejercicio). Dicha pendiente, en teoría, siempre es negativa, puesto que a mayor orden de red, menor el número de cursos, como de hecho ocurre en el ejemplo graficado. La demostración matemática a continuación así lo demostrará, y la podremos poner en relación con $R_b$.
 
-$$m=log{N_{u+1}}-log{N_u}$$
+$$m=\frac{log_{10}N_{u+1}-log_{10}N_u}{({u+1})-u}$$
 
-$$m=-(log{N_u}-log{N_{u+1}})$$
+$$m=\frac{log_{10}N_{u+1}-log_{10}N_u}{1}$$
 
-$$m=-(log\frac{N_u}{N_{u+1}})$$
+$$m=log_{10}N_{u+1}-log_{10}N_u$$
 
-$$m=-logR_b$$
+$$m=-(log_{10}N_u-log_{10}N_{u+1})$$
 
-Por lo tanto, la pendiente de la recta no es más que menos el logaritmo de la razón de bifurcación, tal como se plantea en esta generalización [@costa1997sensitivity]:
+$$m=-(log_{10}\frac{N_u}{N_{u+1}})$$
+
+$$m=-log_{10}R_b$$
+
+Por lo tanto, la pendiente de la recta no es más que el opuesto del logaritmo de la razón de bifurcación, tal como se plantea en esta generalización [@costa1997sensitivity]:
 
 \begin{figure}[H]
   \includegraphics{img/rb_pendiente.png}
 \end{figure}
+
+Si despejamos a $R_b$, obtenemos entonces entonces:
+
+$$-m=log_{10}R_b$$
+
+$$10^{-m}=R_b$$
+
+$$\frac{1}{10^m}=R_b$$
+
+Volviendo a los datos del arroyo Pantuflas, y dado que lo que necesitamos obtener es la pendiente de la función $log_{10}N_u=mu$, nos será de utilidad construir un modelo de regresión lineal usando mínimos cuadrados:
+
+```{r}
+mod <- lm(log10(num_of_streams) ~ order, data=d)
+plot(num_of_streams~order, data=d, log="y")
+abline(mod)
+text(2, 20, 'logN=2.064-0.544u')
+```
+
+La pendiente de la regresión es el factor que multiplica al número de orden de red $u$, que en este caso es $-0.544$. Dentro del modelo regresión de R, dicho valor ocupa la posición número 2 del vector de coeficientes del objeto `mod`:
+
+```{r}
+mod$coefficients[[2]]
+```
+
+Por lo tanto, la $R_b$ se calcularía así:
+
+```{r}
+rb <- 1/10^mod$coefficients[[2]]
+round(rb,4)
+```
+
+Que es el mismo valor de *"Bif.rt."* contenido en la sección *"Stream ratios based on regression coefficient"* generada por el addon `r.stream.stats` en modo expandido:
+
+```{r, eval=FALSE}
+execGRASS(
+  "r.stream.stats",
+  flags = c('overwrite','quiet'),
+  parameters = list(
+    stream_rast = 'order-strahler',
+    direction = 'drainage-dir-de-rstr',
+    elevation = 'dem',
+    output = 'pant_stats_expanded.txt'
+  )
+)
+```
+
+\begin{figure}[H]
+  \includegraphics{img/pant_stats_expanded.png}
+\end{figure}
+
 
 ## Referencias

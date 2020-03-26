@@ -58,18 +58,6 @@ execGRASS(
 )
 ```
 
-## Mostrar lista nuevamente
-
-```{r}
-execGRASS(
-  'g.list',
-  flags = 't',
-  parameters = list(
-    type = c('raster', 'vector')
-  )
-)
-```
-
 ## Crear mapas de órdenes de red
 
 ```{r}
@@ -87,6 +75,18 @@ execGRASS(
     shreve = 'order-shreve',
     hack = 'order-hack-gravelius',
     topo = 'order-topology'
+  )
+)
+```
+
+## Mostrar lista nuevamente
+
+```{r}
+execGRASS(
+  'g.list',
+  flags = 't',
+  parameters = list(
+    type = c('raster', 'vector')
   )
 )
 ```
@@ -224,7 +224,9 @@ leaflet() %>%
     options = layersControlOptions(collapsed=FALSE))
 ```
 
-## Estadística de red resumidas por orden de red
+## Estadísticas de red resumidas por orden de red.
+
+> **Explicación complementaria sobre la obtención de la razón de bifurcación, [aquí](https://github.com/geomorfologia-master/unidad-4-asignacion-1-procesos-fluviales/blob/master/razon-de-bifurcacion.pdf)**
 
 ```{r}
 execGRASS(
@@ -242,11 +244,12 @@ d <- read.csv("pant_stats.txt", skip=1, header=TRUE)
 plot(num_of_streams~order, data=d, log="y")
 mod <- lm(log10(num_of_streams)~order, data=d)
 abline(mod)
-rb <- 1/10^mod$coefficients[2]
+text(2, 20, 'logN=2.064-0.544u')
+rb <- 1/10^mod$coefficients[[2]]
 rb
 ```
 
-## Estadística de red ampliadas
+## Estadísticas de red ampliadas
 
 ```{r}
 execGRASS(
