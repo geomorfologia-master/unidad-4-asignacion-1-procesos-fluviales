@@ -25,9 +25,7 @@ El orden de red de curso fluvial es un número entero positivo usado en geomorfo
 \end{figure}
 
 
-@horton1945erosional define la razón de bifurcación se define como la relación entre el número promedio de cursos fluviales de un orden dado entre el número de cursos del orden inmediatamente mayor (ver figura arriba sobre ejemplos de orden de red. Según el mismo autor, usualmente esta razón es constante para todos los órdenesde red en una cuenca determinada.
-
-Por ejemplo, si existen 10 cursos fluviales de orden 1 y 3 de orden 2, la relación de bifurcación sería el resultado de dividir $10/3=3.333$. La expectativa, en teoría, sería que, para la misma cuenca, el número de cursos de orden 3 fuese 1, para $3/1=1$.
+@horton1945erosional define la razón de bifurcación se define como la relación entre el número promedio de cursos fluviales de un orden dado entre el número de cursos del orden inmediatamente mayor (ver figura arriba sobre ejemplos de orden de red. Según el mismo autor, usualmente esta razón es constante para todos los órdenes de red en una cuenca determinada.
 
 Su fórmula es:
 
@@ -35,7 +33,11 @@ $$R_b=\frac{N_u}{N_{u+1}}$$
 
 donde $R_b$ es la razón de bifurcación, $N_u$ es el número de cursos de orden de red $u$, y $N_{u+1}$ es el número de cursos del orden de red inmediatamente mayor.
 
-Sea $N_u=f(u)$. Si graficamos el logaritmo del número de cursos por cada orden de red (según el método de Strahler), notaremos que existe una relación lineal. Este sería un ejemplo con datos reales de la cuenca del arroyo Pantuflas (Constanza, República Dominicana), utilizando el addon de GRASS GIS `r.stream.stats` [@grassrstreamstats]:
+Por ejemplo, imaginemos una cuenca modelo en la que existen 10 cursos fluviales de orden 1 y 3 de orden 2. La relación de bifurcación sería el resultado de dividir $10/3=3.333$. Dentro de la cuenca modelo, la expectativa sería que haya 1 curso de orden 3, para una razón de bifurcación de $3/1=3$.
+
+Asumiendo que el número de cursos fluviales es función del orden de red, entonces $N_u=f(u)$. Si graficamos el logaritmo del número de cursos por cada orden de red (según el método de Strahler), notaremos que existe una relación lineal entre ambas variables.
+
+A continuación, muestro un ejemplo de cómo calcular la razón de bifurcación con datos reales (cuenca del arroyo Pantuflas, República Dominicana), utilizando el addon de GRASS GIS `r.stream.stats` [@grassrstreamstats]:
 
 ```{r, eval=FALSE}
 execGRASS(
