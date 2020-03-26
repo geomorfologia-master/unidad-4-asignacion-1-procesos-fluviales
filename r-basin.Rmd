@@ -1,0 +1,160 @@
+---
+title: "Orden de red"
+output: html_document
+bibliography: biblio.bib
+csl: apa.csl
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  collapse=TRUE,
+  fig.path = "img/",
+  eval = T
+)
+options(knitr.duplicate.label = "allow")
+```
+
+<!-- Este .md fue generado a partir del .Rmd homónimo. Edítese el .Rmd -->
+
+<!-- ## Retomar región de GRASS GIS creada en pasos previos -->
+
+```{r, include=FALSE}
+source(
+  knitr::purl(
+    'orden-de-red.Rmd',
+    output=tempfile()
+  )
+)
+```
+
+## Imprimir lista de mapas ráster y vectoriales dentro en la región/localización activa
+
+* Nótese que los paquetes requeridos en esta sessión (`rgrass7`, `raster`, `leaflet`, `leafem`), fueron en el bloque anterior al ejecutarse el código contenido en el archivo `crear-una-cuenca-con-r-water-outlet.Rmd`. Igualmente, dicho bloque de código creó todos los objetos necesarios para realizar este tutorial.
+
+```{r}
+execGRASS(
+  'g.list',
+  flags = 't',
+  parameters = list(
+    type = c('raster', 'vector')
+  )
+)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## Obtener coordenada de la desembocadura de cada red de drenaje según orden de red de Strahler
+
+```{r}
+coordoutletsord <- sapply(
+  min(minmaxord):max(minmaxord),
+  function(x){
+    basinsr <- raster(readRAST(paste0('r-stream-basins-',x)))
+    basinscat <- unique(na.omit(basinsr[]))
+    names(basinscat) <- paste0(
+      'Strahler order ',
+      x,
+      ', basin # ',
+      as.character(basinscat)
+    )
+    sapply(
+      basinscat,
+      function(y){
+        mk <- basinsr
+        mk[!mk==y] <- NA
+        xyFromCell(
+          dem,
+          which.min(
+            mask(dem, mk)
+          )
+        )
+      },
+      USE.NAMES = T,
+      simplify = F
+    )
+  }
+)
+
+##Saving results
+coordoutletsord <- lapply(
+  coordoutletsord,
+  plyr::ldply,
+  data.frame,
+  .id = 'cat')
+coordoutletsord.sp <- lapply(
+  coordoutletsord,
+  function(x) {
+    xy <- x[,c('x','y')]
+    SpatialPointsDataFrame(
+      coords = xy,
+      data = x,
+      proj4string = CRS("+init=epsg:32619")
+    )
+  }
+)
+exportoutlets <- lapply(
+  1:length(coordoutletsord.sp),
+  function(x) {
+    writeOGR(
+      coordoutletsord.sp[[x]],
+      dsn = paste0(
+        wd,
+        '/outputs/subbasinsorder/coords/'),
+      layer = paste0('coordord-',x),
+      driver = 'ESRI Shapefile',
+      overwrite_layer = T
+    )
+  }
+)
+```
+
+
+
+
+
+```{r}
+execGRASS(
+  'g.list',
+  flags = 't',
+  parameters = list(
+    type = c('raster', 'vector')
+  )
+)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## Limpiar archivo de bloqueo del conjunto de mapas de GRASS
+
+```{r}
+unlink_.gislock()
+```
+
+## Referencias

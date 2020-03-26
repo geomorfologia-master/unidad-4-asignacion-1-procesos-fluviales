@@ -1,0 +1,271 @@
+---
+title: "Orden de red, morfometría y análisis hortoniano usando r.stream*"
+output: html_document
+bibliography: biblio.bib
+csl: apa.csl
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  collapse=TRUE,
+  fig.path = "img/",
+  eval = T
+)
+options(knitr.duplicate.label = "allow")
+```
+
+<!-- Este .md fue generado a partir del .Rmd homónimo. Edítese el .Rmd -->
+
+<!-- ## Retomar región de GRASS GIS creada en pasos previos -->
+
+```{r, include=FALSE}
+source(
+  knitr::purl(
+    'extraer-red-de-drenaje-con-r-stream.Rmd',
+    output=tempfile()
+  )
+)
+```
+
+## Imprimir lista de mapas ráster y vectoriales dentro en la región/localización activa
+
+* Nótese que los paquetes requeridos en esta sessión (`rgrass7`, `raster`, `leaflet`, `leafem`), fueron en el bloque anterior al ejecutarse el código contenido en el archivo `crear-una-cuenca-con-r-water-outlet.Rmd`. Igualmente, dicho bloque de código creó todos los objetos necesarios para realizar este tutorial.
+
+```{r}
+execGRASS(
+  'g.list',
+  flags = 't',
+  parameters = list(
+    type = c('raster', 'vector')
+  )
+)
+```
+
+## Crear mapa de dirección de flujo a partir de r.stream
+
+```{r}
+execGRASS(
+  "r.stream.extract",
+  flags = c('overwrite','quiet'),
+  parameters = list(
+    elevation = 'dem',
+    threshold = 80,
+    direction = 'drainage-dir-de-rstr'
+  )
+)
+```
+
+## Mostrar lista nuevamente
+
+```{r}
+execGRASS(
+  'g.list',
+  flags = 't',
+  parameters = list(
+    type = c('raster', 'vector')
+  )
+)
+```
+
+## Crear mapas de órdenes de red
+
+```{r}
+execGRASS(
+  "r.stream.order",
+  flags = c('overwrite','quiet'),
+  parameters = list(
+    stream_rast = 'pantuflas-stream-de-rstr',
+    direction = 'drainage-dir-de-rstr',
+    elevation = 'dem',
+    accumulation = 'accum-de-rwshed',
+    stream_vect = 'order_all',
+    strahler = 'order-strahler',
+    horton = 'order-horton',
+    shreve = 'order-shreve',
+    hack = 'order-hack-gravelius',
+    topo = 'order-topology'
+  )
+)
+```
+
+## Visualizar la red con leaflet
+
+### Simbología única
+
+```{r, results='hide', warning=FALSE, message=FALSE}
+order <- readVECT('order_all')
+```
+
+```{r}
+order4326 <- spTransform(order, CRSobj = CRS("+init=epsg:4326"))
+leaflet() %>% 
+  addProviderTiles(providers$Stamen.Terrain, group = 'terrain') %>%
+  addPolylines(
+    data = order4326, weight = 3, opacity = 0.7, group = 'order',
+    label = ~as.character(strahler),
+    highlightOptions = highlightOptions(color = "white",
+                                      weight = 5, bringToFront = F, opacity = 1),
+    labelOptions = labelOptions(noHide = T,
+                                style = list(
+                                  "font-size" = "8px",
+                                  "background" = "rgba(255, 255, 255, 0.5)",
+                                  "background-clip" = "padding-box",
+                                  "padding" = "1px"))) %>% 
+  leafem::addHomeButton(extent(order4326), 'Ver todo') %>% 
+  addLayersControl(
+    overlayGroups = c('terrain','order'),
+    options = layersControlOptions(collapsed=FALSE))
+```
+
+### Simbología aplicando grosor según orden de red
+
+```{r}
+leaflet() %>% 
+  addProviderTiles(providers$Stamen.Terrain, group = 'terrain') %>%
+  addPolylines(
+    data = order4326, weight = order4326$strahler*1.5, opacity = 0.7, group = 'order',
+    label = ~as.character(strahler),
+    highlightOptions = highlightOptions(color = "white",
+                                      weight = 5, bringToFront = F, opacity = 1),
+    labelOptions = labelOptions(noHide = F)) %>% 
+  leafem::addHomeButton(extent(order4326), 'Ver todo') %>% 
+  addLayersControl(
+    overlayGroups = c('terrain','order'),
+    options = layersControlOptions(collapsed=FALSE))
+```
+
+## Delimitar cuencas según orden de red de Strahler
+
+### Obtener órdenes de red mínimo y máximo
+
+```{r}
+#Estadísticas para obtener los valores mínimo y máximo del orden de red de Strahler
+rinfo.ordstra <- execGRASS(
+  'r.info',
+  flags = 'r',
+  parameters = list(
+    map = 'order-strahler'
+  )
+)
+#Órdenes de red mínimo y máximo
+minmaxord <- as.numeric(
+  stringr::str_extract_all(
+    attributes(rinfo.ordstra)$resOut,
+    "[0-9]+"
+  )
+)
+minmaxord
+```
+
+### Delimitar cuencas, convertirlas de ráster a vectorial
+
+```{r}
+sapply(
+  min(minmaxord):max(minmaxord),
+  function(x){
+    execGRASS(
+      "r.stream.basins",
+      flags = c('overwrite','c','quiet'),
+      parameters = list(
+        direction = 'drainage-dir-de-rstr',
+        stream_rast = 'order-strahler',
+        cats = as.character(x),
+        basins = paste0('r-stream-basins-',x)
+      )
+    )
+    execGRASS(
+      "r.to.vect",
+      flags=c('overwrite','quiet'),
+      parameters = list(
+         input = paste0('r-stream-basins-',x),
+         output = paste0('r_stream_basins_',x),
+         type = 'area'
+      )
+    )
+  }
+)
+```
+
+### Representar las cuencas con leaflet
+
+```{r, results='hide', warning=FALSE, message=FALSE}
+sapply(
+  min(minmaxord):max(minmaxord),
+  function(x){
+    assign(
+      paste0('orden', x),
+      spTransform(readVECT(paste0('r_stream_basins_',x)), CRSobj = CRS("+init=epsg:4326")),
+      envir = .GlobalEnv)
+  }
+)
+```
+
+```{r}
+paleta <- RColorBrewer::brewer.pal(12, 'Set3')
+leaflet() %>% 
+  addProviderTiles(providers$Stamen.Terrain, group = 'terrain') %>%
+  addPolygons(data = orden4, stroke = T, weight = 2,
+              color = ~paleta, fillOpacity = 0.4, group = 'O4') %>% 
+  addPolygons(data = orden3, stroke = T, weight = 2,
+              color = ~paleta, fillOpacity = 0.4, group = 'O3') %>%
+  addPolygons(data = orden2, stroke = T, weight = 2,
+              color = ~paleta, fillOpacity = 0.4, group = 'O2') %>%
+  addPolygons(data = orden1, stroke = T, weight = 2,
+              color = ~paleta, fillOpacity = 0.4, group = 'O1') %>%
+  addPolylines(
+    data = order4326, weight = order4326$strahler*1.5,
+    opacity = 0.7, group = 'str_order') %>%
+  leafem::addHomeButton(extent(order4326), 'Ver todo') %>% 
+  addLayersControl(
+    overlayGroups = c('terrain','O1','O2','O3','O4','str_order'),
+    options = layersControlOptions(collapsed=FALSE))
+```
+
+## Estadística de red resumidas por orden de red
+
+```{r}
+execGRASS(
+  "r.stream.stats",
+  flags = c('overwrite','quiet','o'),
+  parameters = list(
+    stream_rast = 'order-strahler',
+    direction = 'drainage-dir-de-rstr',
+    elevation = 'dem',
+    output = 'pant_stats.txt'
+  )
+)
+file.show('pant_stats.txt')
+d <- read.csv("pant_stats.txt", skip=1, header=TRUE)
+plot(num_of_streams~order, data=d, log="y")
+mod <- lm(log10(num_of_streams)~order, data=d)
+abline(mod)
+rb <- 1/10^mod$coefficients[2]
+rb
+```
+
+## Estadística de red ampliadas
+
+```{r}
+execGRASS(
+  "r.stream.stats",
+  flags = c('overwrite','quiet'),
+  parameters = list(
+    stream_rast = 'order-strahler',
+    direction = 'drainage-dir-de-rstr',
+    elevation = 'dem',
+    output = 'pant_stats_expanded.txt'
+  )
+)
+file.show('pant_stats_expanded.txt')
+```
+
+## Limpiar archivo de bloqueo del conjunto de mapas de GRASS
+
+```{r}
+unlink_.gislock()
+```
+
+## Referencias

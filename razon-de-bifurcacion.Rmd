@@ -1,0 +1,80 @@
+---
+title: "Orden de red y razón de bifurcación"
+author: José Ramón Martínez Batlle
+output: pdf_document
+bibliography: biblio.bib
+csl: apa.csl
+editor_options: 
+  chunk_output_type: console
+header-includes:
+ \usepackage{float}
+ \floatplacement{figure}{H}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Orden de red y razón de bifurcación
+
+El orden de red de curso fluvial es un número entero positivo usado en geomorfología e hidrología como indicativo del grado de ramificación de una red de drenaje, y es un paso importante en el análisis topológicos de redes [@wikistreamorder, @grassrstreamorder]. Existen muchos métodos para establecer el orden de red, pero el más conocido es el de Strahler [@strahler1957quantitative], por su sencillez, consistencia y por ofrecer un procedimiento inequívoco, a diferencia del Horton [@horton1945erosional], al que históricamente sustituye.
+
+\begin{figure}[H]
+  \includegraphics{img/orders.png}
+  \caption{Ejemplos de métodos de establecimiento del orden de red. Tomado de: GRASS Development Team (2020a)}
+\end{figure}
+
+
+@horton1945erosional define la razón de bifurcación se define como la relación entre el número promedio de cursos fluviales de un orden dado entre el número de cursos del orden inmediatamente mayor (ver figura arriba sobre ejemplos de orden de red. Según el mismo autor, usualmente esta razón es constante para todos los órdenesde red en una cuenca determinada.
+
+Por ejemplo, si existen 10 cursos fluviales de orden 1 y 3 de orden 2, la relación de bifurcación sería el resultado de dividir $10/3=3.333$. La expectativa, en teoría, sería que, para la misma cuenca, el número de cursos de orden 3 fuese 1, para $3/1=1$.
+
+Su fórmula es:
+
+$$R_b=\frac{N_u}{N_{u+1}}$$
+
+donde $R_b$ es la razón de bifurcación, $N_u$ es el número de cursos de orden de red $u$, y $N_{u+1}$ es el número de cursos del orden de red inmediatamente mayor.
+
+Sea $N_u=f(u)$. Si graficamos el logaritmo del número de cursos por cada orden de red (según el método de Strahler), notaremos que existe una relación lineal. Este sería un ejemplo con datos reales de la cuenca del arroyo Pantuflas, utilizando el addon de GRASS GIS `r.stream.stats` [@grassrstreamstats]:
+
+```{r, eval=FALSE}
+execGRASS(
+  "r.stream.stats",
+  flags = c('overwrite', 'verbose','o'),
+  parameters = list(
+    stream_rast = 'order-strahler',
+    direction = 'drainage-dir-de-rstr',
+    elevation = 'dem',
+    output = 'pant_stats.txt'
+  )
+)
+```
+
+```{r, fig.width=5, fig.height=5}
+d <- read.csv("pant_stats.txt", skip=1, header=TRUE)
+plot(num_of_streams~order, data=d, log="y")
+```
+
+> El eje $y$ es log10.
+
+De esta manera, podemos formular la función $log{N_u}=mu$, donde el $u$ es el orden de red y $m$ una pendiente por determinar. Dicha pendiente, en teoría, siempre es negativa, puesto que a mayor orden de red, menor el número de cursos, como de hecho ocurre en el ejemplo graficado. La fórmula para obtener dicha pendiente es:
+
+$$m=\frac{log{N_{u+1}}-log{N_u}}{({u+1})-{u}}$$
+
+$$m=\frac{log{N_{u+1}}-log{N_u}}{1}$$
+
+$$m=log{N_{u+1}}-log{N_u}$$
+
+$$m=-(log{N_u}-log{N_{u+1}})$$
+
+$$m=-(log\frac{N_u}{N_{u+1}})$$
+
+$$m=-logR_b$$
+
+Por lo tanto, la pendiente de la recta no es más que menos el logaritmo de la razón de bifurcación, tal como se plantea en esta generalización [@costa1997sensitivity]:
+
+\begin{figure}[H]
+  \includegraphics{img/rb_pendiente.png}
+\end{figure}
+
+## Referencias
