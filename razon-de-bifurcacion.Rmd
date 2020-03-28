@@ -15,29 +15,35 @@ header-includes:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Orden de red y razón de bifurcación
+## Orden de red
 
-El orden de red de curso fluvial es un número entero positivo usado en geomorfología e hidrología como indicativo del grado de ramificación de una red de drenaje, y es un paso importante en el análisis topológicos de redes [@wikistreamorder, @grassrstreamorder]. Existen muchos métodos para establecer el orden de red, pero el más conocido es el de Strahler [@strahler1957quantitative], por su sencillez, consistencia y por ofrecer un procedimiento inequívoco, a diferencia del Horton [@horton1945erosional], al que históricamente sustituye.
+El orden de red de curso fluvial es un número entero positivo usado en geomorfología e hidrología como indicador del grado de ramificación de una red de drenaje, y es un paso importante en el análisis topológico de redes [@wikistreamorder, @grassrstreamorder]. Existen muchos métodos para establecer el orden de red, pero el más conocido es el de Strahler [@strahler1957quantitative], comúnmente preferido sobre el de Horton [@horton1945erosional] (ver figura \ref{ejemplometodosordenred}).
+
+Cada uno tiene sus ventajas: el método de Strahler es sencillo y consistente, pero no considera a la red de manera íntegra, ni utiliza el concepto de curso principal, aspectos ambos que sí son considerados en el de Horton. Asimismo, cada uno tiene desventajas: el primero es inequívoco y no da lugar jerarquizaciones incosistentes, mientras que el segundo es interpretable y, por lo tanto, diferentes jerarquizaciones podrían realizarse para una misma cuenca.
+
+>Más sobre los métodos ordenación jerárquica de red en la lista de reproducción [**Geomorfología (GEO114), licenciatura en Geografía, UASD**.](https://www.youtube.com/watch?v=9F7BIAUNvRY&list=PLDcT2n8UzsCSt1-NnUQ8anwHhmouFr0Kv)
 
 \begin{figure}[H]
   \includegraphics{img/orders.png}
   \caption{Ejemplos de métodos de establecimiento del orden de red. Tomado de: GRASS Development Team (2020a)}
+  \label{ejemplometodosordenred}
 \end{figure}
 
+## Razón de bifurcación
 
-@horton1945erosional define la razón de bifurcación se define como la relación entre el número promedio de cursos fluviales de un orden dado entre el número de cursos del orden inmediatamente mayor (ver figura arriba sobre ejemplos de orden de red. Según el mismo autor, usualmente esta razón es constante para todos los órdenes de red en una cuenca determinada.
-
-Su fórmula es:
+@horton1945erosional define la razón de bifurcación como la relación entre el número  de cursos fluviales de un orden dado entre el número de cursos del orden inmediatamente mayor (ver figura \ref{ejemplometodosordenred}). Según el mismo autor, usualmente esta razón es constante para todos los órdenes de red en una cuenca determinada. Su fórmula es:
 
 $$R_b=\frac{N_u}{N_{u+1}}$$
 
 donde $R_b$ es la razón de bifurcación, $N_u$ es el número de cursos de orden de red $u$, y $N_{u+1}$ es el número de cursos del orden de red inmediatamente mayor.
 
-Por ejemplo, imaginemos una cuenca modelo en la que existen 10 cursos fluviales de orden 1 y 3 de orden 2. La relación de bifurcación sería el resultado de dividir $10/3=3.333$. Dentro de la cuenca modelo, la expectativa sería que haya 1 curso de orden 3, para una razón de bifurcación de $3/1=3$.
+Existen dos tipos de razones de bifurcación, en función del método utilizado para calcularla, y cada una produce resultados distintos. El primer tipo, que denominaremos **razón de bifuración promedio**, es fácil de calcular pero menos "sintética". Consiste en promediar los valores de $R_b$ por cada par de órdenes consecutivos. El segundo tipo, denominado **razón de bifurcación por medio de coeficientes de regresión**, consiste en generar una recta de regresión y utilizar su pendiente para estimar la razón de bifurcación. A continuación muestro los procedimientos específicos sobre cómo calcular cada una tanto en R como directamente en GRASS GIS, utilizando como modelo la red de drenaje del arroyo Pantuflas (Constanza, República Dominicana).
 
-Asumiendo que el número de cursos fluviales es función del orden de red, entonces $N_u=f(u)$. Si graficamos el logaritmo del número de cursos por cada orden de red (según el método de Strahler), notaremos que existe una relación lineal entre ambas variables.
+### Razón de bifuración promedio
 
-A continuación, muestro un ejemplo de cómo calcular la razón de bifurcación con datos reales (cuenca del arroyo Pantuflas, República Dominicana), utilizando el addon de GRASS GIS `r.stream.stats` [@grassrstreamstats]:
+La cuenca del arroyo Pantuflas tiene un orden de red máximo de 4. Para obtener los datos fuente, es decir, número de cursos por orden, usaré el addon de GRASS GIS `r.stream.stats` [@grassrstreamstats]; nótese que añado el flag `o`, necesario para generar estadísticas por orden de red.
+
+>Para correr el módulo se requiere tener una sesión de GRASS iniciada, y disponer de las entradas requeridas por el módulo, que son los siguientes tres mapas ráster: orden de red, dirección de flujo y elevación. En este ejemplo se muestra la ejecución del addon desde R mediante el paquete `rgrass7`.
 
 ```{r, eval=FALSE}
 execGRASS(
@@ -52,20 +58,108 @@ execGRASS(
 )
 ```
 
-```{r, fig.width=5, fig.height=5}
+La salida del módulo se guarda en `pant_stats.txt`, que es un archivo de valores separados por comas, el cual contiene el resultado de las estadísticas por orden de red, tal como se muestra a continuación:
+
+```{r}
 d <- read.csv("pant_stats.txt", skip=1, header=TRUE)
+d
+```
+
+Como vemos, en la cuenca del arroyo Pantuflas existen 41 cursos fluviales de orden 1, 8 de orden 2, 2 de orden 3 y 1 de orden 4. La razón de bifurcación para el par de órdenes 1|2 es $41/8=5.125$, para el par 2|3 es $8/2=4.0$, y para 3|4 es $2/1=2.0$. El valor promedio sería $R_b=3.7083$, tal como muestra el código de R a continuación:
+
+```{r}
+rbp <- mean(d$num_of_streams[-length(d$num_of_streams)]/d$num_of_streams[-1])
+rbp
+```
+
+El cuadro de la figura \ref{ejemplorbpromedio} muestra el procedimiento mediante hoja de cálculo:
+
+\begin{figure}[H]
+	\centering
+  \includegraphics[width=0.7\columnwidth]{img/ejemplo-de-rb-promedio.png}
+  \caption{Ejemplo de obtención de la razón de bifurcación promedio utilizando hoja de cálculo}
+  \label{ejemplorbpromedio}
+\end{figure}
+
+### Razón de bifurcación por medio de coeficientes de regresión
+
+Para calcular la razón de bifurcación por medio de coeficientes de regresión, se obtiene primero un modelo lineal del logaritmo (e.g. base 10) del número de cursos fluviales en función del orden de red. El uso del logaritmo se debe a que existe una relación exponencial entre el número de cursos fluviales y el orden de red. Finalmente, se utiliza la pendiente de dicha recta para el cálculo de la relación de bifurcación, mediante la fórmula (al final incluyo la demostración):
+
+$$R_b=\frac{1}{10^m}$$
+
+donde $R_b$ es la razón de bifurcación y $m$ es la pendiente de la recta de regresión $log_{10}N=mu$ (donde $u \epsilon \mathbb{N}$). Por lo tanto, el procedimiento requiere primero obtener el número de cursos fluviales por orden, generar el modelo con dichos datos y luego utilizar la pendiente de la recta para calcular la $R_b$.
+
+Mostraré un ejemplo de cálculo utilizando los mismos datos generados arriba por el addon `r.stream.stats` de la red de Pantuflas, los cuales fueron asignados al objeto `d`. Seguiré el siguiente orden: mostraré un gráfico de dispersión del logaritmo en base 10 del número de cursos y el orden de red, luego generaré el modelo lineal con dichas variables, a continuación obtendré el coeficiente de regresión correspondiente a la pendiente ($m$) y, finalmente, estimaré la razón de bifurcación mediante la fórmula $R_b=\frac{1}{10^m}$.
+
+Primero el gráfico de dispersión:
+
+```{r, fig.align='center', out.width='50%', fig.cap="\\label{graficodispersion}Número de cursos fluviales es función del orden de red. La ordenada usa escala log10"}
 plot(num_of_streams~order, data=d, log="y")
 ```
 
-> El eje $y$ es log10.
+El gráfico confirma la mencionada relación exponencial, dado que la ordenada utiliza escala logarítmica y los puntos insinúan una línea recta. Necesitamos entonces obtener una recta de regresión para este conjunto de datos, por lo que construimos el modelo de regresión lineal usando mínimos cuadrados mediante la función `lm` de R:
+
+```{r, fig.align='center', out.width='50%', fig.cap='Recta de regresión para el modelo "número de cursos fluviales es función del orden de red" y ecuación correspondiente'}
+mod <- lm(log10(num_of_streams) ~ order, data=d)
+plot(num_of_streams~order, data=d, log="y")
+abline(mod)
+text(2.2, 20, 'logN=2.064-0.544u')
+```
+
+La pendiente de la recta es el factor que multiplica al orden de red $u$, que en este caso es $-0.544$. El modelo regresión de R es el objeto `mod`, el cual contiene un vector denominado `coefficients`, cuyo segundo valor es el coeficiente de la variable $u$:
+
+```{r}
+mod$coefficients[[2]]
+```
+
+Aplicando la fórmula $R_b=\frac{1}{10^m}$, la razón de bifurcación sería:
+
+```{r}
+rb <- 1/10^mod$coefficients[[2]]
+round(rb,4)
+```
+
+Nótese que este valor es diferente al obtenido para la razón de bifurcación promedio.
+
+### Utilizando el addon de `r.stream.stats` de manera directa para estimar ambas $R_b$
+
+Una forma más directa (aunque algo críptica) de obtener ambas razones de bifurcación, consiste en utilizar el addon de GRASS GIS `r.stream.stats` sin el flag `o`.  
+
+```{r, eval=FALSE}
+execGRASS(
+  "r.stream.stats",
+  flags = c('overwrite','quiet'),
+  parameters = list(
+    stream_rast = 'order-strahler',
+    direction = 'drainage-dir-de-rstr',
+    elevation = 'dem',
+    output = 'pant_stats_expanded.txt'
+  )
+)
+```
+
+El archivo `pant_stats_expanded.txt`, que es el resultado del código anterior, muestra ambas razones de bifurcación (ver figura \ref{capturaexpanded}). El valor bajo *Bif.rt.* de la sección *"Averaged stream ratios with standard deviations"* corresponde a la razón de bifurcación promedio (la segunda línea es la desviación estándar). Por otra parte, *"Bif.rt."* de la sección *"Stream ratios based on regression coefficient"* corresponde a la razón de bifurcación por medio de coeficientes de regresión:
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.7\columnwidth]{img/pant_stats_expanded.png}
+  \caption{Captura de pantalla del archivo "pant\_stats\_expanded.txt"}
+  \label{capturaexpanded}
+\end{figure}
+
+Como vemos, ambos valores coinciden con lo calculado por medio de código de R, por lo que se confirma la consistencia entre algoritmos.
+
+## Demostración de fórmula de la razón de bifurcación
+
+Asumamos que el número de cursos fluviales es función del orden de red, entonces $N_u=f(u)$. El diagrama de dispersión de la figura \ref{graficodispersion} sugiere que el logaritmo del número de cursos y el orden de red (según el método de Strahler) siguen una relación lineal.
 
 Formulemos entonces la siguiente función:
 
 $$log_{10}N_u=mu$$
 
-donde $N_u$ es el número de cursos de orden $u$, y $m$ es una pendiente por determinar (la base es irrelevante siempre que se utilice la misma de manera consistente a lo largo del ejercicio). Dicha pendiente, en teoría, siempre es negativa, puesto que a mayor orden de red, menor el número de cursos, como de hecho ocurre en el ejemplo graficado. La demostración matemática a continuación así lo demostrará, y la podremos poner en relación con $R_b$.
+donde $N_u$ es el número de cursos de orden $u$, y $m$ es una pendiente por determinar (la base es irrelevante siempre que se utilice la misma de manera consistente en la demostración). Dicha pendiente, en teoría, siempre es negativa, puesto que, a mayor orden de red, menor el número de cursos, como de hecho ocurre en el ejemplo graficado (ver figura \ref{graficodispersion}). No existe un intercepto, o al menos no tiene relevancia en el cálculo, puesto que el orden 0 no existe. Partiendo de esta función, generaré una fórmula con la cual calcular la $R_b$ a partir de la pendiente.
 
-$$m=\frac{log_{10}N_{u+1}-log_{10}N_u}{({u+1})-u}$$
+$$m=\frac{\Delta Y}{\Delta X}=\frac{Y_1-Y_0}{X_1-X_0}=\frac{log_{10}N_{u+1}-log_{10}N_u}{({u+1})-u}$$
 
 $$m=\frac{log_{10}N_{u+1}-log_{10}N_u}{1}$$
 
@@ -91,46 +185,7 @@ $$10^{-m}=R_b$$
 
 $$\frac{1}{10^m}=R_b$$
 
-Volviendo a los datos del arroyo Pantuflas, y dado que lo que necesitamos obtener es la pendiente de la función $log_{10}N_u=mu$, nos será de utilidad construir un modelo de regresión lineal usando mínimos cuadrados:
 
-```{r}
-mod <- lm(log10(num_of_streams) ~ order, data=d)
-plot(num_of_streams~order, data=d, log="y")
-abline(mod)
-text(2, 20, 'logN=2.064-0.544u')
-```
-
-La pendiente de la regresión es el factor que multiplica al número de orden de red $u$, que en este caso es $-0.544$. Dentro del modelo regresión de R, dicho valor ocupa la posición número 2 del vector de coeficientes del objeto `mod`:
-
-```{r}
-mod$coefficients[[2]]
-```
-
-Por lo tanto, la $R_b$ se calcularía así:
-
-```{r}
-rb <- 1/10^mod$coefficients[[2]]
-round(rb,4)
-```
-
-Que es el mismo valor de *"Bif.rt."* contenido en la sección *"Stream ratios based on regression coefficient"* generada por el addon `r.stream.stats` en modo expandido:
-
-```{r, eval=FALSE}
-execGRASS(
-  "r.stream.stats",
-  flags = c('overwrite','quiet'),
-  parameters = list(
-    stream_rast = 'order-strahler',
-    direction = 'drainage-dir-de-rstr',
-    elevation = 'dem',
-    output = 'pant_stats_expanded.txt'
-  )
-)
-```
-
-\begin{figure}[H]
-  \includegraphics{img/pant_stats_expanded.png}
-\end{figure}
 
 
 ## Referencias
