@@ -24,7 +24,7 @@ options(knitr.duplicate.label = "allow")
 ```{r, include=FALSE}
 source(
   knitr::purl(
-    'extraer-red-de-drenaje-con-r-stream.Rmd',
+    'orden-de-red.Rmd',
     output=tempfile()
   )
 )
@@ -44,16 +44,37 @@ execGRASS(
 )
 ```
 
-## 
+## Función para obtener perfiles longitudinales
 
 ```{r}
 devtools::source_url('https://raw.githubusercontent.com/geofis/rgrass/master/lfp_network.R') #Cargada como función "LfpNetwork"
 LfpNetwork(
-  xycoords = pant_out,
+  xycoords = my_trans(c(-70.77262,18.90225)),
   suffix = 'Pnt',
   stream_vect = 'order_all',
-  direction = 'r-extract-direction-final'
+  direction = 'drainage-dir-de-rstr'
 )
+
+execGRASS(
+  'g.list',
+  flags = 't',
+  parameters = list(
+    type = c('raster', 'vector')
+  )
+)
+
+devtools::source_url('https://raw.githubusercontent.com/geofis/rgrass/master/lfp_profiles_concavity.R') #Cargada como función "LfpProfilesConcavity"
+pantuflas_conv_prof <- LfpProfilesConcavity(
+  xycoords = my_trans(c(-70.77262,18.90225)),
+  network = 'LfpNetwork_lfp_all_final_Pnt',
+  prefix = 'Ptl',
+  dem = 'dem',
+  direction = 'drainage-dir-de-rstr',
+  crs = '+init=epsg:32619',
+  smns = 0.5,
+  nrow = 6)
+
+
 ```
 
 
