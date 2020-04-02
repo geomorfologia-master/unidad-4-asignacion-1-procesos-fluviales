@@ -32,7 +32,7 @@ source(
 
 ## Imprimir lista de mapas ráster y vectoriales dentro en la región/localización activa
 
-* Nótese que los paquetes requeridos en esta sessión (`rgrass7`, `raster`, `leaflet`, `leafem`), fueron en el bloque anterior al ejecutarse el código contenido en el archivo `crear-una-cuenca-con-r-water-outlet.Rmd`. Igualmente, dicho bloque de código creó todos los objetos necesarios para realizar este tutorial.
+* Nótese que los paquetes requeridos en esta sessión (`rgrass7`, `raster`, `leaflet`, `leafem`), fueron en el bloque anterior al ejecutarse el código contenido en el archivo `extraer-red-de-drenaje-con-r-stream.Rmd`. Igualmente, dicho bloque de código creó todos los objetos necesarios para realizar este tutorial.
 
 ```{r}
 execGRASS(

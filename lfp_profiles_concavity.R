@@ -150,7 +150,7 @@ LfpProfilesConcavity <- function(xycoords, network, prefix, dem, direction,
           rownamex <- lengthdifx[,'rowname']
           rownamegreater <- lengthdifx[, 'dif'] > sqrt(gmeta()$nsres^2 + gmeta()$ewres^2)
           rownamegreater2 <- lengthdifx[rownamegreater,'rowname']
-          rownamex[rownamex >= rownamegreater2]
+          # rownamex[rownamex >= rownamegreater2]
         }
       )
     )
@@ -161,10 +161,10 @@ LfpProfilesConcavity <- function(xycoords, network, prefix, dem, direction,
   longeststream <- dfs3[which.max(dfs3[,'length']),'stream']
   ncolors <- length(levels(dfs3[,'stream']))
   p <- ggplot(dfs3, aes(x=length, y=z, group=stream, colour=stream))+
-    geom_line(lwd = 1) +
-    geom_line(
-      data = dfs3[dfs3[,'stream']==longeststream,],
-      aes(x=length, y=z), col = 'black', lwd = 2) +
+    geom_line(lwd = 1, alpha = 0.5) +
+    # geom_line(
+    #   data = dfs3[dfs3[,'stream']==longeststream,],
+    #   aes(x=length, y=z), col = 'black', lwd = 2) +
     scale_color_manual(values = rep(brewer.pal(8,"Dark2"), length.out = ncolors)) +
     geom_dl(aes(label=stream), method="last.points") +
     theme(
@@ -214,10 +214,9 @@ LfpProfilesConcavity <- function(xycoords, network, prefix, dem, direction,
     ) +
     scale_x_continuous(breaks = c(0,0.5,1), labels = c(0,0.5,1)) +
     scale_y_continuous(breaks = c(0,0.5,1), labels = c(0,0.5,1)) +
-    annotate(
-      "text",
-      x = 0.1, y = 0.9,
-      label = paste0('C[a]==', round(ci[,'ci'],2)),
+    geom_text(
+      data = ci,
+      mapping = aes(x = 0.1, y = 0.9, label=paste0('C[a]==', round(ci,2))), #label = ci,
       size = 5,
       hjust = 0,
       parse = T

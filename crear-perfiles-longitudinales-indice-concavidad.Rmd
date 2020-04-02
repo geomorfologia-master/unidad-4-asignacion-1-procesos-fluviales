@@ -32,7 +32,7 @@ source(
 
 ## Imprimir lista de mapas ráster y vectoriales dentro en la región/localización activa
 
-* Nótese que los paquetes requeridos en esta sessión (`rgrass7`, `raster`, `leaflet`, `leafem`), fueron en el bloque anterior al ejecutarse el código contenido en el archivo `crear-una-cuenca-con-r-water-outlet.Rmd`. Igualmente, dicho bloque de código creó todos los objetos necesarios para realizar este tutorial.
+* Nótese que los paquetes requeridos en esta sessión (`rgrass7`, `raster`, `leaflet`, `leafem`), fueron en el bloque anterior al ejecutarse el código contenido en el archivo `orden-de-red.Rmd`. Igualmente, dicho bloque de código creó todos los objetos necesarios para realizar este tutorial.
 
 ```{r}
 execGRASS(
@@ -44,17 +44,27 @@ execGRASS(
 )
 ```
 
-## Función para obtener perfiles longitudinales
+## Obtener coordenada
 
 ```{r}
+mapview(order, col.regions = 'blue', legend = FALSE)
+```
+
+## Obtener cursos más largos (cargar función propia)
+
+```{r, results='hide', warning=FALSE, message=FALSE}
 devtools::source_url('https://raw.githubusercontent.com/geofis/rgrass/master/lfp_network.R') #Cargada como función "LfpNetwork"
 LfpNetwork(
-  xycoords = my_trans(c(-70.77262,18.90225)),
+  xycoords = my_trans(c(-70.77261,18.90225)),
   suffix = 'Pnt',
   stream_vect = 'order_all',
   direction = 'drainage-dir-de-rstr'
 )
+```
 
+## Imprimir lista de mapas ráster y vectoriales
+
+```{r}
 execGRASS(
   'g.list',
   flags = 't',
@@ -62,8 +72,51 @@ execGRASS(
     type = c('raster', 'vector')
   )
 )
+```
 
-devtools::source_url('https://raw.githubusercontent.com/geofis/rgrass/master/lfp_profiles_concavity.R') #Cargada como función "LfpProfilesConcavity"
+## Representar con leaflet
+
+```{r, results='hide', warning=FALSE, message=FALSE}
+lfp <- readVECT('LfpNetwork_lfp_all_final_Pnt')
+```
+
+```{r}
+lfp4326 <- spTransform(lfp, CRSobj = CRS("+init=epsg:4326"))
+leaflet() %>%
+  addProviderTiles(providers$Stamen.Terrain, group = 'terrain') %>%
+  addPolylines(
+    data = lfp4326, weight = 3, opacity = 0.7, group = 'order',
+    label = ~as.character(cat),
+    highlightOptions = highlightOptions(color = "white",
+                                      weight = 5, bringToFront = F, opacity = 1),
+    labelOptions = labelOptions(noHide = T,
+                                style = list(
+                                  "font-size" = "8px",
+                                  "background" = "rgba(255, 255, 255, 0.5)",
+                                  "background-clip" = "padding-box",
+                                  "padding" = "1px"))) %>% 
+  leafem::addHomeButton(extent(lfp4326), 'Ver todo')
+```
+
+## Exportar a KML
+
+```{r, results='hide', warning=FALSE, message=FALSE}
+execGRASS(
+  'v.out.ogr',
+  flags = c('overwrite','quiet'),
+  parameters = list(
+    input = 'LfpNetwork_lfp_all_final_Pnt',
+    output = 'lfp_kml.kml',
+    format = 'KML',
+    dsco = 'NameField=cat'
+  )
+)
+```
+
+## Obtención de perfiles longitudinales e índices de concavidad
+
+```{r, results='hide', warning=FALSE, message=FALSE}
+source('lfp_profiles_concavity.R') #Cargado como función "LfpProfilesConcavity"
 pantuflas_conv_prof <- LfpProfilesConcavity(
   xycoords = my_trans(c(-70.77262,18.90225)),
   network = 'LfpNetwork_lfp_all_final_Pnt',
@@ -72,134 +125,28 @@ pantuflas_conv_prof <- LfpProfilesConcavity(
   direction = 'drainage-dir-de-rstr',
   crs = '+init=epsg:32619',
   smns = 0.5,
-  nrow = 6)
-
-
+  nrow = 3)
 ```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-## Crear perfiles longitudinales para la red tal cual
+## Mostrar resultados
 
 ```{r}
-source('lfp_profiles_concavity_for_any_network.R') #Cargada como función "AnyNetworkProfilesConcavity"
-pantuflas_conv_prof_lfp <- AnyNetworkProfilesConcavity(
-  xycoords = pant_out,
-  network = 'pantuflas_stream_de_rstr',
-  prefix = 'Pnt',
-  dem = 'dem',
-  direction = 'drainage-dir-de-rwshed',
-  crs = '+init=epsg:32619',
-  smns = 0.5,
-  nrow = 6
-  )
+pantuflas_conv_prof$profiles
+pantuflas_conv_prof$concavityindex
+pantuflas_conv_prof$dimensionlessprofiles
 ```
 
 ## Tabla dx/dy, tanto en metros como adimensional. Útiles para construir perfiles por cuenta propia
 
 ```{r}
-pantuflas_conv_prof_lfp$lengthzdata
-pantuflas_conv_prof_lfp$lengthzdatadmnls
+pantuflas_conv_prof$lengthzdata %>% tibble::as.tibble()
+pantuflas_conv_prof$lengthzdatadmnls %>% tibble::as.tibble()
 ```
 
-## Mapa con identificación de cursos fluviales
+## Revisar en QGIS/Google Earth relación litología/concavidad
 
-```{r}
-pant_net_lfp_4326 <- spTransform(pantuflas_conv_prof_lfp$longestflowpaths, CRSobj = CRS("+init=epsg:4326"))
-leaflet() %>% 
-  addProviderTiles(providers$Stamen.Terrain, group = 'terrain') %>%
-  addPolylines(
-    data = pant_net_lfp_4326, weight = 3, opacity = 0.7, group = 'str_vect',
-    label = ~as.character(cat),
-    highlightOptions = highlightOptions(color = "white",
-                                      weight = 5, bringToFront = F, opacity = 1),
-    smoothFactor = 0.1,
-    labelOptions = labelOptions(noHide = T,
-                                style = list(
-                                  "font-size" = "8px",
-                                  "background" = "rgba(255, 255, 255, 0.5)",
-                                  "background-clip" = "padding-box",
-                                  "padding" = "1px"))) %>% 
-  leafem::addHomeButton(extent(pant_net_lfp_4326), 'Ver todo') %>% 
-  addLayersControl(
-    overlayGroups = c('terrain','str_vect'),
-    options = layersControlOptions(collapsed=FALSE))
-```
+Descargar archivo `lfp_kml.kml` localmente, superponer al mapa geológico usando QGIS y GoogleEarth, evaluar los índices de concavidad y formas del perfil longitudinal de los cursos más largos en relación con la litología, las fallas, el orden de red, entre otras variables.
 
-## Índices de concavidad
-
-```{r}
-pantuflas_conv_prof_lfp$concavityindex
-```
-
-## Perfiles longitudinales, todos en uno
-
-```{r}
-pantuflas_conv_prof_lfp$profiles
-```
-
-## Crear perfiles longitudinales para la red de cursos más largos
-
-```{r}
-source('lfp_profiles_concavity.R') #Cargada como función "LfpProfilesConcavity"
-pantuflas_conv_prof <- LfpProfilesConcavity(
-  xycoords = pant_out,
-  network = 'pantuflas_stream_de_rstr',
-  prefix = 'Ptl',
-  dem = 'dem',
-  direction = 'drainage-dir-de-rwshed',
-  crs = '+init=epsg:32619',
-  smns = 0.5,
-  nrow = 6)
-```
-
-## Mapa con identificación de cursos fluviales
-
-```{r}
-pant_net_4326 <- spTransform(pantuflas_conv_prof$longestflowpaths, CRSobj = CRS("+init=epsg:4326"))
-leaflet() %>% 
-  addProviderTiles(providers$Stamen.Terrain, group = 'terrain') %>%
-  addPolylines(
-    data = pant_net_4326, weight = 3, opacity = 0.7, group = 'str_vect',
-    label = ~as.character(cat),
-    highlightOptions = highlightOptions(color = "white",
-                                      weight = 5, bringToFront = T, opacity = 1),
-    smoothFactor = 0.1,
-    labelOptions = labelOptions(noHide = T,
-                                style = list(
-                                  "font-size" = "8px",
-                                  "background" = "rgba(255, 255, 255, 0.5)",
-                                  "background-clip" = "padding-box",
-                                  "padding" = "1px"))) %>% 
-  leafem::addHomeButton(extent(pant_net_4326), 'Ver todo') %>% 
-  addLayersControl(
-    overlayGroups = c('terrain','str_vect'),
-    options = layersControlOptions(collapsed=FALSE))
-```
-
-
-
-
-
-
-
-## Distribución de los índices de concavidad
-
-```{r}
-
-```
 
 ## Limpiar archivo de bloqueo del conjunto de mapas de GRASS
 
