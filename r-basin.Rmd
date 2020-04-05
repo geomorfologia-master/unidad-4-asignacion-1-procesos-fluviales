@@ -1,5 +1,5 @@
 ---
-title: "Orden de red"
+title: "Parámetros de cuenca con r.basin"
 output: html_document
 bibliography: biblio.bib
 csl: apa.csl
@@ -19,20 +19,145 @@ options(knitr.duplicate.label = "allow")
 
 <!-- Este .md fue generado a partir del .Rmd homónimo. Edítese el .Rmd -->
 
-<!-- ## Retomar región de GRASS GIS creada en pasos previos -->
-
-```{r, include=FALSE}
-source(
-  knitr::purl(
-    'orden-de-red.Rmd',
-    output=tempfile()
+```{r}
+library(rgrass7)
+gisdbase <- 'grass-data-test' #Base de datos de GRASS GIS
+wd <- getwd() #Directorio de trabajo
+wd
+loc <- initGRASS(gisBase = "/usr/lib/grass78/",
+                 home = wd,
+                 gisDbase = paste(wd, gisdbase, sep = '/'),
+                 location = 'pantuflas',
+                 mapset = "PERMANENT",
+                 override = TRUE)
+gmeta()
+execGRASS(
+  'g.list',
+  flags = 't',
+  parameters = list(
+    type = c('raster', 'vector')
   )
 )
 ```
 
-## Imprimir lista de mapas ráster y vectoriales dentro en la región/localización activa
+## Convertir a números enteros la extensión y la resolución del DEM
 
-* Nótese que los paquetes requeridos en esta sessión (`rgrass7`, `raster`, `leaflet`, `leafem`), fueron en el bloque anterior al ejecutarse el código contenido en el archivo `crear-una-cuenca-con-r-water-outlet.Rmd`. Igualmente, dicho bloque de código creó todos los objetos necesarios para realizar este tutorial.
+```{r}
+library(raster)
+rutadem <- 'data/dem.tif'
+rawextent <- extent(raster(rutadem))
+rawextent
+devtools::source_url('https://raw.githubusercontent.com/geofis/rgrass/master/integerextent.R')
+devtools::source_url('https://raw.githubusercontent.com/geofis/rgrass/master/xyvector.R')
+newextent <- intext(e = rawextent, r = 90, type = 'inner')
+newextent
+gdalUtils::gdalwarp(
+  srcfile = 'data/dem.tif',
+  dstfile = 'data/demint.tif',
+  te = xyvector(newextent),
+  tr = c(90,90),
+  r = 'bilinear',
+  overwrite = T
+)
+```
+
+## Importar a sesión de GRASS
+
+```{r, results='hide', warning=FALSE, message=FALSE}
+rutademint <- 'data/demint.tif'
+execGRASS(
+  "g.proj",
+  flags = c('t','c'),
+  georef=rutademint)
+gmeta()
+execGRASS(
+  "r.in.gdal",
+  flags='overwrite',
+  parameters=list(
+    input=rutademint,
+    output="demint"
+  )
+)
+execGRASS(
+  "g.region",
+  parameters=list(
+    raster = "demint",
+    align = "demint"
+  )
+)
+```
+
+```{r}
+gmeta()
+execGRASS(
+  'g.list',
+  flags = 't',
+  parameters = list(
+    type = c('raster', 'vector')
+  )
+)
+```
+
+## Generar red de drenaje para obtener coordenada posteriormente
+
+```{r}
+execGRASS(
+  "r.stream.extract",
+  flags = c('overwrite','quiet'),
+  parameters = list(
+    elevation = 'demint',
+    threshold = 80,
+    stream_raster = 'stream-de-rstr',
+    stream_vector = 'stream_de_rstr'
+  )
+)
+execGRASS(
+  'g.list',
+  flags = 't',
+  parameters = list(
+    type = c('raster', 'vector')
+  )
+)
+```
+
+## Obtener coordenada
+
+```{r, results='hide', warning=FALSE, message=FALSE}
+library(sp)
+use_sp()
+library(mapview)
+netw <- spTransform(
+  readVECT('stream_de_rstr'),
+  CRSobj = CRS("+init=epsg:4326"))
+```
+
+```{r}
+mapview(netw, col.regions = 'blue', legend = FALSE)
+```
+
+## Transformar coordenada a EPSG:32619 como número entero
+
+```{r}
+source('my-trans.R')
+outlet <- as.integer(my_trans(c(-70.77398,18.90123)))
+```
+
+## Ejecutar `r.basin`
+
+```{r, results='hide', warning=FALSE, message=FALSE}
+pref <- 'rbasin_pant'
+execGRASS(
+  "r.basin",
+  flags = 'overwrite',
+  parameters = list(
+    map = 'demint',
+    prefix = pref,
+    coordinates = outlet,
+    threshold = 80,
+    dir = 'salidas-rbasin/pantuflas'
+  )
+)
+```
 
 ```{r}
 execGRASS(
@@ -44,112 +169,58 @@ execGRASS(
 )
 ```
 
+## Si `r.basin` arrojara error (sólo en el caso de error, no en caso de advertencia), ejecutar este bloque para borrar las salidas anteriores y reejecutar el `r.basin`:
 
-
-
-
-
-
-
-
-
-
-
-
-
-## Obtener coordenada de la desembocadura de cada red de drenaje según orden de red de Strahler
-
-```{r}
-coordoutletsord <- sapply(
-  min(minmaxord):max(minmaxord),
-  function(x){
-    basinsr <- raster(readRAST(paste0('r-stream-basins-',x)))
-    basinscat <- unique(na.omit(basinsr[]))
-    names(basinscat) <- paste0(
-      'Strahler order ',
-      x,
-      ', basin # ',
-      as.character(basinscat)
-    )
-    sapply(
-      basinscat,
-      function(y){
-        mk <- basinsr
-        mk[!mk==y] <- NA
-        xyFromCell(
-          dem,
-          which.min(
-            mask(dem, mk)
-          )
-        )
-      },
-      USE.NAMES = T,
-      simplify = F
-    )
-  }
-)
-
-##Saving results
-coordoutletsord <- lapply(
-  coordoutletsord,
-  plyr::ldply,
-  data.frame,
-  .id = 'cat')
-coordoutletsord.sp <- lapply(
-  coordoutletsord,
-  function(x) {
-    xy <- x[,c('x','y')]
-    SpatialPointsDataFrame(
-      coords = xy,
-      data = x,
-      proj4string = CRS("+init=epsg:32619")
-    )
-  }
-)
-exportoutlets <- lapply(
-  1:length(coordoutletsord.sp),
-  function(x) {
-    writeOGR(
-      coordoutletsord.sp[[x]],
-      dsn = paste0(
-        wd,
-        '/outputs/subbasinsorder/coords/'),
-      layer = paste0('coordord-',x),
-      driver = 'ESRI Shapefile',
-      overwrite_layer = T
-    )
-  }
-)
-```
-
-
-
-
-
-```{r}
+```{r, eval=FALSE}
 execGRASS(
-  'g.list',
-  flags = 't',
+  "g.remove",
+  flags = 'f',
   parameters = list(
-    type = c('raster', 'vector')
+    type = c('raster','vector'),
+    pattern = paste0(pref, '*')
   )
 )
 ```
 
+## Cargar los vectoriales transformados a EPSG:4326 para visualizar en leaflet
 
+```{r, results='hide', warning=FALSE, message=FALSE}
+rbnetw <- spTransform(
+  readVECT('rbasin_pant_demint_network'),
+  CRSobj = CRS("+init=epsg:4326"))
+rbnetw
+rbmain <- spTransform(
+  readVECT('rbasin_pant_demint_mainchannel'),
+  CRSobj = CRS("+init=epsg:4326"))
+rbmain
+rbbasin <- spTransform(
+  readVECT('rbasin_pant_demint_basin'),
+  CRSobj = CRS("+init=epsg:4326"))
+rbbasin
+```
 
+```{r}
+library(leaflet)
+leaflet() %>%
+  addProviderTiles(providers$Stamen.Terrain, group = 'terrain') %>%
+  addPolylines(data = rbnetw, weight = 3, opacity = 0.7) %>% 
+  addPolylines(data = rbmain, weight = 3, opacity = 0.7, color = 'red') %>% 
+  addPolygons(data = rbbasin) %>% 
+  leafem::addHomeButton(extent(rbbasin), 'Ver cuenca')
+```
 
+## Explorar los parámetros de cuenca
 
+```{r}
+library(readr)
+rbpantpar1 <- read_csv("salidas-rbasin/pantuflas/rbasin_pant_demint_parametersT.csv")
+rbpantpar1 %>% tibble::as_tibble()
 
-
-
-
-
-
-
-
-
-
+rbpantpar2 <- read_csv(
+  "salidas-rbasin/pantuflas/rbasin_pant_demint_parameters.csv",
+  skip=2, col_names = c('Parameter', 'Value'))
+rbpantpar2 %>% print(n=Inf)
+```
 
 ## Limpiar archivo de bloqueo del conjunto de mapas de GRASS
 
