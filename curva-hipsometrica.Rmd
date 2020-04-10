@@ -1,0 +1,90 @@
+---
+title: "Parámetros de cuenca con r.basin"
+output: html_document
+bibliography: biblio.bib
+csl: apa.csl
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  collapse=TRUE,
+  fig.path = "img/",
+  eval = T
+)
+options(knitr.duplicate.label = "allow")
+```
+
+<!-- Este .md fue generado a partir del .Rmd homónimo. Edítese el .Rmd -->
+
+<!-- ## Retomar región de GRASS GIS creada en pasos previos -->
+
+```{r, include=FALSE}
+source(
+  knitr::purl(
+    'orden-de-red.Rmd',
+    output=tempfile()
+  )
+)
+```
+
+## Imprimir lista de mapas ráster y vectoriales dentro en la región/localización activa
+
+* Nótese que los paquetes requeridos en esta sessión (`rgrass7`, `raster`, `leaflet`, `leafem`), fueron en el bloque anterior al ejecutarse el código contenido en el archivo `orden-de-red.Rmd`. Igualmente, dicho bloque de código creó todos los objetos necesarios para realizar este tutorial.
+
+```{r}
+execGRASS(
+  'g.list',
+  flags = 't',
+  parameters = list(
+    type = c('raster', 'vector')
+  )
+)
+```
+
+## Representar cuencas
+
+```{r, results='hide', warning=FALSE, message=FALSE}
+library(sp)
+use_sp()
+library(mapview)
+bas2 <- readVECT('r_stream_basins_2')
+bas3 <- readVECT('r_stream_basins_3')
+```
+
+## Curva e integral hipsométrica
+
+```{r}
+source('integral_hypsometric_curve.R') #Cargada como función "HypsoIntCurve"
+HypsoBasinsOrder2 <- HypsoIntCurve(
+  basins = 'r_stream_basins_2',
+  dem = 'dem',
+  labelfield = 'cat',
+  nrow = 2,
+  labelsize = 4
+)
+HypsoBasinsOrder2$HypsoInt
+HypsoBasinsOrder2$HypsoCurve
+mapview(bas2, zcol='cat', col.regions = 'blue', legend = FALSE)
+
+HypsoBasinsOrder3 <- HypsoIntCurve(
+  basins = 'r_stream_basins_3',
+  dem = 'dem',
+  labelfield = 'cat',
+  nrow = 1,
+  labelsize = 4
+)
+HypsoBasinsOrder3$HypsoInt
+HypsoBasinsOrder3$HypsoCurve
+mapview(bas3, zcol='cat', col.regions = 'blue', legend = FALSE)
+```
+
+## Limpiar archivo de bloqueo del conjunto de mapas de GRASS
+
+```{r}
+unlink_.gislock()
+```
+
+## Referencias
