@@ -1,5 +1,5 @@
 ---
-title: "Parámetros de cuenca con r.basin"
+title: "Curva e integral hipsométrica"
 output: html_document
 bibliography: biblio.bib
 csl: apa.csl
@@ -56,7 +56,7 @@ bas3 <- readVECT('r_stream_basins_3')
 
 ## Curva e integral hipsométrica
 
-```{r}
+```{r, results='hide', warning=FALSE, message=FALSE}
 source('integral_hypsometric_curve.R') #Cargada como función "HypsoIntCurve"
 HypsoBasinsOrder2 <- HypsoIntCurve(
   basins = 'r_stream_basins_2',
@@ -65,10 +65,15 @@ HypsoBasinsOrder2 <- HypsoIntCurve(
   nrow = 2,
   labelsize = 4
 )
+```
+
+```{r}
 HypsoBasinsOrder2$HypsoInt
 HypsoBasinsOrder2$HypsoCurve
 mapview(bas2, zcol='cat', col.regions = 'blue', legend = FALSE)
+```
 
+```{r, results='hide', warning=FALSE, message=FALSE}
 HypsoBasinsOrder3 <- HypsoIntCurve(
   basins = 'r_stream_basins_3',
   dem = 'dem',
@@ -76,6 +81,9 @@ HypsoBasinsOrder3 <- HypsoIntCurve(
   nrow = 1,
   labelsize = 4
 )
+```
+
+```{r}
 HypsoBasinsOrder3$HypsoInt
 HypsoBasinsOrder3$HypsoCurve
 mapview(bas3, zcol='cat', col.regions = 'blue', legend = FALSE)
