@@ -70,7 +70,8 @@ HypsoBasinsOrder2 <- HypsoIntCurve(
 ```{r}
 HypsoBasinsOrder2$HypsoInt
 HypsoBasinsOrder2$HypsoCurve
-mapview(bas2, zcol='cat', col.regions = 'blue', legend = FALSE) %>% addStaticLabels(zcol = 'cat')
+mapview(bas2, zcol='cat', col.regions = 'blue', legend = FALSE) %>%
+  addStaticLabels(label = bas2$cat)
 ```
 
 ```{r, results='hide', warning=FALSE, message=FALSE}
@@ -86,7 +87,8 @@ HypsoBasinsOrder3 <- HypsoIntCurve(
 ```{r}
 HypsoBasinsOrder3$HypsoInt
 HypsoBasinsOrder3$HypsoCurve
-mapview(bas3, zcol='cat', col.regions = 'blue', legend = FALSE) %>% addStaticLabels(zcol = 'cat')
+mapview(bas3, zcol='cat', col.regions = 'blue', legend = FALSE) %>%
+  addStaticLabels(label = bas3$cat)
 ```
 
 ## Limpiar archivo de bloqueo del conjunto de mapas de GRASS
