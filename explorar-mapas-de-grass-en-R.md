@@ -29,7 +29,7 @@ op <- par()
 plot(dem_sp)
 ```
 
-![](img/unnamed-chunk-4-1.png)
+![](img/explore/unnamed-chunk-4-1.png)
 
 Cargar a R el mapa vectorial de una cuenca que se encuentra alojado fuera de GRASS, hacer el plot y representar la cuenca del arroyo Pantuflas superpuesta
 ----------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -49,7 +49,7 @@ plot(dem_sp)
 plot(pantuflas, add=T, col='transparent', border='black', lwd=5);par(op[c('mfrow','mar')])
 ```
 
-![](img/unnamed-chunk-5-1.png)
+![](img/explore/unnamed-chunk-5-1.png)
 
 Analizar el DEM dentro de la cuenca del Pantuflas
 -------------------------------------------------
@@ -62,7 +62,7 @@ dem_pant <- mask(dem_r1, pantuflas)
 plot(dem_pant)
 ```
 
-![](img/unnamed-chunk-6-1.png)
+![](img/explore/unnamed-chunk-6-1.png)
 
 ``` r
 summary(dem_pant)
@@ -76,7 +76,7 @@ summary(dem_pant)
 hist(dem_pant)
 ```
 
-![](img/unnamed-chunk-6-2.png)
+![](img/explore/unnamed-chunk-6-2.png)
 
 Obtener variables de terreno básicas con el paquete `raster` dentro de R
 ------------------------------------------------------------------------
@@ -86,7 +86,7 @@ pend_pant <- terrain(x = dem_pant, opt = 'slope', unit = 'degrees')
 plot(pend_pant)
 ```
 
-![](img/unnamed-chunk-7-1.png)
+![](img/explore/unnamed-chunk-7-1.png)
 
 ``` r
 summary(pend_pant)
@@ -100,7 +100,7 @@ summary(pend_pant)
 hist(pend_pant)
 ```
 
-![](img/unnamed-chunk-7-2.png)
+![](img/explore/unnamed-chunk-7-2.png)
 
 Obtener la misma variable de terreno con GRASS GIS
 --------------------------------------------------
@@ -137,7 +137,7 @@ pend_pant_g <- readRAST('slope')
 plot(pend_pant_g);par(op[c('mfrow','mar')])
 ```
 
-![](img/unnamed-chunk-9-1.png)
+![](img/explore/unnamed-chunk-9-1.png)
 
 ``` r
 summary(pend_pant_g)

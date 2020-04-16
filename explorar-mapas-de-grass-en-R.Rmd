@@ -11,7 +11,6 @@ editor_options:
 knitr::opts_chunk$set(
   echo = TRUE,
   collapse=TRUE,
-  fig.path = "img/",
   eval = T
 )
 options(knitr.duplicate.label = "allow")
@@ -28,6 +27,7 @@ source(
     output=tempfile()
   )
 )
+knitr::opts_chunk$set(fig.path = "img/explore/")
 ```
 
 ## Imprimir lista de mapas ráster y vectoriales dentro en la región/localización activa

@@ -20,36 +20,9 @@ knitr::opts_chunk$set(
 
 # Geomorfología. Tema 4. Procesos fluviales
 
-## Dos notas
-
-### Léeme
+## Léeme
 
 Dentro de las opciones de `knitr`, en el encabezado de este archivo, es probable que encuentres el argumento `eval = F`. Antes de tejer debes cambiarlo a `eval = T`, para que evalúe los bloques de código según tus cambios.
-
-### Funciones para facilitar la realización de los ejercicios
-
-```{r mononscripts, message=FALSE, warning=FALSE, tidy=FALSE}
-scripts <- c(
-  'plotgrass.R',
-  'integerextent.R',
-  'xyvector.R',
-  'comparerasters.R',
-  'lfp_network.R',
-  'lfp_network_merge.R',
-  'lfp_profiles_concavity.R',
-  'lfp_profiles_concavity_for_any_network.R',
-  'integral_hypsometric_curve.R',
-  'pT.R',
-  'tts_polar_plot.R',
-  'transverse_topographic_symmetry.R',
-  'sources_for_transverse_topographic_symmetry.R'
-  )
-ghsource <- paste('https://raw.githubusercontent.com/geofis/rgrass/master/')
-invisible(purrr::map(
-    paste0(ghsource, scripts),
-    devtools::source_url)
-)
-```
 
 ## Recursos en línea sobre GRASS GIS para geomorfología
 
@@ -62,15 +35,13 @@ invisible(purrr::map(
 [Lista de recursos de pago](https://grass.osgeo.org/documentation/books/)
 
 
-## Asignaciones a cada estudiante
-
-### Coordenadas de cuencas asignadas para ejercicio 3
+## Coordenadas de cuencas asignadas
 
 ```{r}
- # abreviatura         corte                         ruta
- #       anala        corte2       data/cortes/corte2.kml
- #       carol        corte3       data/cortes/corte3.kml
- #       danie        corte1       data/cortes/corte1.kml
+ # abreviatura     coordenadas (EPSG:4326)
+ #       anala     
+ #       carol     
+ #       danie     
 ```
 
 
@@ -78,7 +49,7 @@ invisible(purrr::map(
 
 ### Ejercicio 1: Introducción a `rgrass7`, interfaz entre GRASS GIS 7 y R. Crear región de GRASS
 
-[**Vídeo de referencia**]()
+[**Vídeo de referencia**](https://www.youtube.com/watch?v=cORbTaa827g&list=PLDcT2n8UzsCSt1-NnUQ8anwHhmouFr0Kv&index=5)
 
 [**Script de referencia**](scripts-de-referencia/intro-a-rgrass.md)
 
@@ -88,11 +59,17 @@ Dentro del bloque de código a continuación, carga el paquete `rgrass7` y crea 
 
 ```
 
-### EJERCICIO 2: Definir proyección de la región de GRASS GIS, importar fuente y utilizarla para definir extensión y resolución. Cómo ver la ayuda de las funciones
+### EJERCICIO 2: Definir región de GRASS GIS utilizando una fuente
 
-[**Vídeo de referencia**]()
+[**Vídeo de referencia**](https://www.youtube.com/watch?v=YkqHMeko8-Y&list=PLDcT2n8UzsCSt1-NnUQ8anwHhmouFr0Kv&index=6)
 
 [**Script de referencia**](scripts-de-referencia/proyeccion-importar-fuente-extension.md)
+
+En el siguiente bloque, escribe el código necesario para definir la proyección de la región de GRASS GIS utilizando como referencia el DEM alojado en `data/dem.tif`. Importa dicha fuente y utilízala para definir la extensión y resolución de la región de GRASS.
+
+```{r}
+
+```
 
 
 ### EJERCICIO 3: Explorar mapas de GRASS en R
@@ -100,6 +77,8 @@ Dentro del bloque de código a continuación, carga el paquete `rgrass7` y crea 
 [**Vídeo de referencia**]()
 
 [**Script de referencia**](scripts-de-referencia/explorar-mapas-de-grass-en-R.md)
+
+Importar el DEM desde la región de GRASS a R. Analízalo, conviértelo a objeto raster de R usando el paquete raster. Genera la pendiente a partir del DEM con el paquete raster y haz lo propio también en GRASS GIS desde R, comparar resultados.
 
 
 
