@@ -169,7 +169,7 @@ execGRASS(
 )
 ```
 
-## Si `r.basin` arrojara error (sólo en el caso de error, no en caso de advertencia), ejecutar este bloque para borrar las salidas anteriores y reejecutar el `r.basin`:
+> Si `r.basin` arrojara error (sólo en el caso de error, no en caso de advertencia), ejecutar este bloque para borrar las salidas anteriores y reejecutar el `r.basin`:
 
 ```{r, eval=FALSE}
 execGRASS(
