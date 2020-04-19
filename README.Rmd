@@ -42,6 +42,7 @@ Dentro de las opciones de `knitr`, en el encabezado de este archivo, es probable
  # abreviatura     coordenadas de desembocaduras (EPSG:32619)
  #       anala     311450,2109960
  #       carol     292900,2124790
+ #       danie     288280,2093570
 ```
 
 ### Nombres geográficos
@@ -50,6 +51,7 @@ Dentro de las opciones de `knitr`, en el encabezado de este archivo, es probable
  # abreviatura     nombre geográfico                     abreviatura de nombre geográfico
  #       anala     Río Yaque del Norte, hasta Manabao    rioydn
  #       carol     Río Bao, hasta Mata Grande            riobao
+ #       danie     Río Yaque del Sur, hasta P. Palomino  rioyds
 ```
 
 ### DEMs
