@@ -36,10 +36,10 @@ Dentro de las opciones de `knitr`, en el encabezado de este archivo, es probable
 
 ## Datos asignados a cada estudiante
 
-### Coordenadas de desembocaduras de cuencas
+### Coordenadas de desembocadura de cuenca
 
 ```{r}
- # abreviatura     coordenadas de desembocaduras (EPSG:32619)
+ # abreviatura     coordenada de desembocadura (EPSG:32619)
  #       anala     311450,2109960
  #       carol     292900,2124790
  #       danie     288280,2093570
@@ -60,6 +60,7 @@ Dentro de las opciones de `knitr`, en el encabezado de este archivo, es probable
  # abreviatura     ruta de archivo DEM
  #       anala     mi-asignacion/data-asignada/demydn.tif
  #       carol     mi-asignacion/data-asignada/dembao.tif
+ #       danie     mi-asignacion/data-asignada/demyds.tif
 ```
 
 ### Límites de cuencas vectorizados
@@ -68,6 +69,7 @@ Dentro de las opciones de `knitr`, en el encabezado de este archivo, es probable
  # abreviatura     ruta de archivo DEM
  #       anala     mi-asignacion/data-asignada/cuenca_rio_yaque_del_norte.geojson
  #       carol     mi-asignacion/data-asignada/cuenca_rio_bao.geojson
+ #       danie     mi-asignacion/data-asignada/cuenca_rio_yaque_del_sur.geojson     
 ```
 
 ## Ejercicios
@@ -133,64 +135,30 @@ Escribe el código necesario para hacer las siguientes tareas:
 
 
 
-
-
 ### EJERCICIO 4: Extrae el límite de tu cuenca hidrográfica
 
-[**Vídeo de referencia**]()
+[**Vídeo de referencia sobre `r.watershed`**](https://www.youtube.com/watch?v=gPDf6w3NOgs&list=PLDcT2n8UzsCSt1-NnUQ8anwHhmouFr0Kv&index=8)
 
-[**Script de referencia**]()
+[**Script de referencia sobre `r.watershed`**](https://github.com/geomorfologia-master/unidad-4-asignacion-1-procesos-fluviales/blob/master/calcular-parametros-hidrograficos-r-watershed.Rmd)
+
+[**Vídeo de referencia sobre `r.water.outlet`**](https://www.youtube.com/watch?v=gPDf6w3NOgs&list=PLDcT2n8UzsCSt1-NnUQ8anwHhmouFr0Kv&index=9)
+
+[**Script de referencia sobre `r.water.outlet`**](https://github.com/geomorfologia-master/unidad-4-asignacion-1-procesos-fluviales/blob/master/crear-una-cuenca-con-r-water-outlet.Rmd)
 
 
-- Usando el addon de GRASS `r.stream.extract`, generar un mapa de dirección de drenaje.
+- Usando el addon de GRASS `r.watershed`, generar un mapa de dirección de drenaje. Lo necesitarás para generar el mapa de cuenca.
+
+- Ejecuta el addon `r.water.outlet` para generar el límite de tu cuenca, usando el mapa de dirección generado en el paso anterior y especificando las coordenadas de desembocadura de tu cuenca. La salida del módulo, que la especificas mediante el parámetro `output`, es una mapa ráster del límite de tu cuenca.
+
+- Vectoriza tu límite de cuenca en GRASS mediante el módulo `r.to.vect`.
+
+- Haz un plot de tu cuenca sobre el DEM. Para ello, primero representa el DEM mediante la función `plot` (el DEM debió haberse importado a R en ejercicios anteriores; en caso contrario, tráelo con `readRAST`). Importa el límite de cuenca a R con la función `readVECT`, y luego haz superpón dicho límite al DEM mediante `plot(vectorial, add=T)` (argumento `add` es clave).
+
+- Haz un plot con la función `mapview` del paquete homónimo.
 
 ```{r}
-source(
-  knitr::purl(
-    'borrar.Rmd',
-    output=tempfile()
-  )
-)
 
-execGRASS(
-  'g.list',
-  flags = 't',
-  parameters = list(
-    type = c('raster', 'vector')
-  )
-)
-
-execGRASS(
-   "r.stream.extract",
-   flags = c('overwrite','quiet'),
-   parameters = list(
-     elevation = 'dem',
-     threshold = 80,
-     direction = 'direccion'
-   )
-)
-
-execGRASS(
-   "r.water.outlet",
-   flags = c('overwrite','quiet'),
-   parameters = list(
-     input = 'direccion',
-     output = 'cuenca',
-     coordinates = c(311450,2109960)
-   )
-)
-library(raster)
-use_sp()
-cuenca <- raster(readRAST('cuenca'))
-plot(cuenca)
 ```
-
-
-- 
-
-
-
-
 
 
 

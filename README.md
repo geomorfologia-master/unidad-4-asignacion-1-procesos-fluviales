@@ -28,6 +28,7 @@ Datos asignados a cada estudiante
  # abreviatura     coordenadas de desembocaduras (EPSG:32619)
  #       anala     311450,2109960
  #       carol     292900,2124790
+ #       danie     288280,2093570
 ```
 
 ### Nombres geográficos
@@ -36,6 +37,7 @@ Datos asignados a cada estudiante
  # abreviatura     nombre geográfico                     abreviatura de nombre geográfico
  #       anala     Río Yaque del Norte, hasta Manabao    rioydn
  #       carol     Río Bao, hasta Mata Grande            riobao
+ #       danie     Río Yaque del Sur, hasta P. Palomino  rioyds
 ```
 
 ### DEMs
@@ -105,6 +107,59 @@ Escribe el código necesario para hacer las siguientes tareas:
 
 *Tu párrafo interpretativo debajo de esta línea*
 
+### EJERCICIO 4: Extrae el límite de tu cuenca hidrográfica
+
+[**Vídeo de referencia sobre `r.watershed`**]()
+
+[**Vídeo de referencia sobre r.water.outlet**]()
+
+[**Script de referencia**]()
+
+-   Usando el addon de GRASS `r.watershed`, generar un mapa de dirección de drenaje.
+
+``` r
+source(
+  knitr::purl(
+    'borrar.Rmd',
+    output=tempfile()
+  )
+)
+
+execGRASS(
+  'g.list',
+  flags = 't',
+  parameters = list(
+    type = c('raster', 'vector')
+  )
+)
+
+execGRASS(
+   "r.watershed",
+   flags = c('overwrite','quiet'),
+   parameters = list(
+     elevation = 'dem',
+     # threshold = 80,
+     drainage = 'direccion'
+   )
+)
+
+execGRASS(
+   "r.water.outlet",
+   flags = c('overwrite','quiet'),
+   parameters = list(
+     input = 'direccion',
+     output = 'cuenca',
+     coordinates = c(311450,2109960)
+   )
+)
+library(raster)
+use_sp()
+cuenca <- raster(readRAST('cuenca'))
+plot(cuenca)
+```
+
+-   
+
 ### EJERCICIO 5: Extrae la red de drenaje de tu DEM
 
 [**Vídeo de referencia**](https://www.youtube.com/watch?v=17MRQTJ4gUU&list=PLDcT2n8UzsCSt1-NnUQ8anwHhmouFr0Kv&index=10)
@@ -128,16 +183,6 @@ Usando el addon de GRASS `r.stream.extract`, realiza las siguientes tareas:
 -   Interpreta las diferencias/similitudes.
 
 *Tu párrafo interpretativo debajo de esta línea*
-
-### EJERCICIO 5: Extrae el límite de tu cuenca hidrográfica
-
-[**Vídeo de referencia**]()
-
-[**Script de referencia**]()
-
-Usando el addon de GRASS `r.stream.extract`, realiza las siguientes tareas:
-
--   Genera una capa de dirección de drenaje.
 
 Referencias
 ===========
