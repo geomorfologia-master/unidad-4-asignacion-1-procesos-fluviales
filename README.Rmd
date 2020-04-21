@@ -84,11 +84,17 @@ Dentro de las opciones de `knitr`, en el encabezado de este archivo, es probable
 Dentro del bloque de código a continuación, carga el paquete `rgrass7` y crea una región de GRASS GIS utilizando los atributos correspondientes en cada parámetro:
 
 - Ruta de inicio (parámetro `home`): `mi-asignacion`
+
 - Nombre del directorio de la base de datos de GRASS GIS (parámetro `gisDbase`): utiliza `mi-asignacion/mi-grass`
+
 - Nombre de localidad (parámetro `location`): usa la abreviatura de nombre geográfico que te tocó.
+
 - Nombre del conjunto de mapas (parámetro `mapset`): utiliza `PERMANENT`
 
-**IMPORTANTE**. Asegúrate que tus parámetros no tengan espacios, signos de puntuación, o tildes.
+> **IMPORTANTE**. Asegúrate que tus parámetros no tengan espacios, signos de puntuación, o tildes.
+
+- Verifica la metadata de tu región con la función `gmeta`.
+
 
 ```{r}
 loc <- initGRASS(gisBase = "/usr/lib/grass78/",
@@ -106,7 +112,15 @@ loc <- initGRASS(gisBase = "/usr/lib/grass78/",
 
 [**Script de referencia**](proyeccion-importar-fuente-extension.md)
 
-Escribe el código necesario para definir la proyección de tu región de GRASS creada en el ejercicio anterior, usando como referencia tu DEM asignado. Importa dicha fuente (tu DEM) a la región de GRASS, y utilízala para definir su extensión y resolución.
+Escribe el código necesario para definir la proyección de tu región de GRASS creada en el ejercicio anterior, usando como referencia tu DEM asignado. Usa el vídeo de referencia para conocer los pasos necesarios. El procedimiento general consiste en:
+
+- Sin importarlo (aún), usa tu DEM para definir la proyección de la región de GRASS (addon `g.proj`).
+
+- Importa el DEM (addon `r.in.gdal`).
+
+- Utilízalo para definir la extensión y resolución de la región de GRASS (addon `g.region`)
+
+- Verifica la metadata de tu región con la función `gmeta`.
 
 ```{r}
 
@@ -119,11 +133,20 @@ Escribe el código necesario para definir la proyección de tu región de GRASS 
 
 [**Script de referencia**](explorar-mapas-de-grass-en-R.md)
 
-Escribe el código necesario para hacer las siguientes tareas:
+Explora y compara mapas de pendientes generados en R y en GRASS. Usa el vídeo de referencia para conocer los pasos necesarios. El procedimiento general consiste en:
 
-- **En R**. Importa a R tu DEM asignado, primero mediante `readRAST` y luego convirtiéndolo a objeto `raster` de R con la función del mismo nombre (también se podría leer desde tu archivo de DEM con la función `raster`). A continuación, usa tu límite de cuenca asignado como máscara de dicho DEM. Luego, genera un mapa de pendiente en R a partir del objeto DEM con la función correspondiente del paquete `raster`. Representa dicha variable (pendiente) en un histograma.
+- Antes que nada, explora qué mapas están disponibles en tu región de GRASS mediante el addon `g.list`.
 
-- **En GRASS desde R**. Lleva tu límite de cuenca a la región de GRASS y úsalo como máscara. Genera un mapa de pendiente, y tráelo a R.
+- **En R**:
+
+    - Carga los paquetes `sp` y `raster`, y ejecuta la función `use_sp()`; esto preparará a R para definir que los mapas de GRASS que importes con el paquete `rgrass7` serán objetos `Spatial*` y `Raster*`.
+    - Importa el DEM desde la región de GRASS mediante la función `readRAST`. Convierte tu DEM a raster con la función `raster` y represéntalo con la función `plot`.
+    - Importa tu límite de cuenca a R. Para ello, carga el paquete `sf`, importa el archivo del límite de tu cuenca con la función `st_read`. Represéntalo con la función `plot` pero añadiendo el argumento `add=T`, para que se superponga sobre el DEM.
+    - Usando el límite de cuenca, corta el DEM con la función `crop`, y enmascáralo con `mask`.
+    - Genera un mapa de pendiente en R a partir del DEM con la función `terrain` del paquete `raster`.
+    - Finalmente, representa el mapa de pendiente con `plot`, e igualmente haz un histograma de dicha variable y calcula sus estadísticos descriptivos básicos con `summary`. Compararás el mapa y los estadísticos de pendiente con los resultados que obtengas en GRASS.
+
+- **En GRASS (recuerda desde R**. Lleva tu límite de cuenca a la región de GRASS y úsalo como máscara. Genera un mapa de pendiente, y tráelo a R.
 
 - **En R nuevamente**. Compara los estadísticos descriptivos de los dos mapas de pendiente, es decir, del generado en R y del generado en GRASS.
 
