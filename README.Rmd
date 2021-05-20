@@ -19,6 +19,11 @@ knitr::opts_chunk$set(
 <!-- Este .md fue generado a partir del .Rmd homónimo. Edítese el .Rmd -->
 
 # Geomorfología. Asignaciones del tema 4: procesos fluviales. Parte 1
+Por José Ramón Martínez Batlle
+[![DOI](https://zenodo.org/badge/248094883.svg)](https://zenodo.org/badge/latestdoi/248094883)
+
+Entrada BibTeX, [aquí](#entrada-bibtex)
+
 
 ## Léeme
 
@@ -252,5 +257,21 @@ Usando el addon de GRASS `r.stream.extract`, realiza las siguientes tareas:
 
 *Describe tus dos redes de drenaje e interprétalas. Algunas preguntas guía: En dos líneas, ¿cómo describirías tus dos redes? ¿Cuál es/son la/s diferencia/s principales entre ambas redes, es decir, entre la generada con umbral 30 y la generada con 80? Clasifica tu tipo de red según morfología, apoyándote en el material de apoyo de la clase (e.g. dendrítica, paralela, etc.) [@gutierrez2008geomorfologia;@pedraza1996geomorfologia].*
 
+## Entrada BibTeX
+
+```
+@software{jose_ramon_martinez_batlle_2021_4425878,
+  author       = {José Ramón Martínez Batlle},
+  title        = {{geomorfologia-master/unidad-4-asignacion-1 
+                   -procesos-fluviales: Let's map}},
+  month        = jan,
+  year         = 2021,
+  publisher    = {Zenodo},
+  version      = {v0.0.0.9000},
+  doi          = {10.5281/zenodo.4425878},
+  url          = {https://doi.org/10.5281/zenodo.4425878}
+}
+```
 
 # Referencias
+
