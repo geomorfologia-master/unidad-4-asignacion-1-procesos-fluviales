@@ -1,5 +1,5 @@
 LfpProfilesConcavity <- function(xycoords, network, prefix, dem, direction,
-                                 crs = '+init=epsg:32619', smns = 0.5, nrow = 4){
+                                 crs = '+init=epsg:32619', smns = 0.5, nrow = 4, size = 3){
   # Edited version from: https://raw.githubusercontent.com/geofis/rgrass/master/lfp_profiles_concavity.R
   # Generate the profile curves and concavity indices
   # of each stream of a network
@@ -217,7 +217,7 @@ LfpProfilesConcavity <- function(xycoords, network, prefix, dem, direction,
     geom_text(
       data = ci,
       mapping = aes(x = 0.1, y = 0.9, label=paste0('C[a]==', round(ci,2))), #label = ci,
-      size = 5,
+      size = size,
       hjust = 0,
       parse = T
     ) +
